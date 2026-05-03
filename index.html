@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg" /> -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DiceKit</title>
+    <script>
+      // Pre-hydration theme application — prevents FOUC.
+      // Mirrors ThemeProvider defaults: storageKey "ui-theme", fallback "system".
+      // Keep in sync with src/shared/lib/theme/ThemeProvider.tsx.
+      (function () {
+        try {
+          var stored = localStorage.getItem("ui-theme");
+          var theme =
+            stored === "light" || stored === "dark" || stored === "system"
+              ? stored
+              : "system";
+          var resolved =
+            theme === "system"
+              ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light"
+              : theme;
+          var root = document.documentElement;
+          if (resolved === "dark") root.classList.add("dark");
+          root.style.colorScheme = resolved;
+        } catch (_) {
+          /* localStorage / matchMedia unavailable — fall through to React effect */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>
