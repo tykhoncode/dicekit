@@ -40,3 +40,6 @@ storybook-static
 
 # Claude Code (per-developer machine settings)
 .claude/settings.local.json
+
+# Agent scratch space (per CLAUDE.md convention)
+.artifacts/
