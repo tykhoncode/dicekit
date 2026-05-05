@@ -62,3 +62,10 @@ Build-time flags (DEV/PROD/MODE) → import.meta.env.X directly for DCE; never i
 
 - **Never add comments** unless explicitly requested by the user.
 - Exception: JSDoc on exported functions when describing public API.
+
+<!-- SPECKIT START -->
+
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+
+<!-- SPECKIT END -->
