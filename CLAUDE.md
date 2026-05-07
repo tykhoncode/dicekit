@@ -65,7 +65,20 @@ Build-time flags (DEV/PROD/MODE) → import.meta.env.X directly for DCE; never i
 
 <!-- SPECKIT START -->
 
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+Active feature: **001-whfb-dice-calculator** (WHFB 8th Edition Dice Calculator UI).
+
+Read the current plan and supporting artifacts before changing related code:
+
+- Plan: `specs/001-whfb-dice-calculator/plan.md`
+- Spec: `specs/001-whfb-dice-calculator/spec.md`
+- Research: `specs/001-whfb-dice-calculator/research.md`
+- Data model: `specs/001-whfb-dice-calculator/data-model.md`
+- Quickstart: `specs/001-whfb-dice-calculator/quickstart.md`
+- Backlog of layout-overflowing rules: `specs/001-whfb-dice-calculator/future-rules-backlog.md`
+
+The plan freezes the four-card layout (FR-037) and routes any WHFB rule that
+doesn't fit through the backlog (FR-038). v1 ships the real WHFB 8th Edition
+dice math for the four core steps; broader rules-engine work (army books, magic
+items, special abilities) stays deferred.
 
 <!-- SPECKIT END -->
