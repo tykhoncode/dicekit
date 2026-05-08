@@ -1,0 +1,56 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
+import { useEffect } from "react";
+import type { ModifierId } from "@/entities/dice/model/types";
+import { useDiceCalculator } from "../model/useDiceCalculator";
+import { ToHitCard } from "./ToHitCard";
+
+const meta = {
+  title: "features/dice-calculator/ToHitCard",
+  component: ToHitCard,
+  parameters: { layout: "centered" },
+  tags: ["autodocs"],
+} satisfies Meta<typeof ToHitCard>;
+
+export default meta;
+
+type Story = StoryObj<typeof ToHitCard>;
+
+function Live({ activate = [] }: { activate?: ModifierId[] }) {
+  const calc = useDiceCalculator();
+  useEffect(() => {
+    for (const id of activate) calc.actions.toggleModifier("toHit", id);
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    <div className="dark w-72">
+      <ToHitCard
+        state={calc.state.toHit}
+        result={calc.results.toHit}
+        onSetStat={(key, value) => calc.actions.setStat("toHit", key, value)}
+        onToggleModifier={(id) => calc.actions.toggleModifier("toHit", id)}
+      />
+    </div>
+  );
+}
+
+export const Default: Story = {
+  render: () => <Live />,
+};
+
+export const WithCharging: Story = {
+  render: () => <Live activate={["toHit:charging"]} />,
+};
+
+export const EdgeCaseUnrollable: Story = {
+  render: () => (
+    <Live
+      activate={[
+        "toHit:hardToHit",
+        "toHit:longRange",
+        "toHit:multipleShots",
+        "toHit:cover",
+      ]}
+    />
+  ),
+};

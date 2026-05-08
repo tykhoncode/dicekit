@@ -2,6 +2,14 @@
 
 Guidance for Claude Code working in this repository.
 
+## Git policy (NON-NEGOTIABLE)
+
+- **Never run `git commit`, `git push`, `git merge`, `git rebase`, `git tag`, `git reset --hard`, or any other history-mutating / remote-publishing git command.** No matter how clearly the work seems to be at a "natural commit point", the agent does not commit. This applies even when the user has previously authorized a commit — authorization is single-use, not standing.
+- **Never bypass the rule via the `commit-commands:*` skills, the `speckit-git-commit` hook, gh CLI (`gh pr create`, `gh pr merge`), or any wrapper that ultimately produces a commit / push.** If a slash-command pre/post hook offers an automatic commit (e.g. `after_constitution`, `after_implement`), display the suggested message and tell the user how to run it themselves — do not invoke it.
+- **Read-only git is fine**: `git status`, `git diff`, `git log`, `git show`, `git branch --list`, `git stash list` etc. are encouraged for context.
+- **Staging is fine** (`git add`, `git restore --staged`) when the user wants help organizing a commit they will create themselves.
+- **Output a suggested commit message instead.** When the work reaches a point that the user might want to commit, surface the suggestion in the chat (conventional-commits + gitmoji style if the project uses it — see `git log` for the established pattern). The user runs `git commit` themselves.
+
 ## Commands
 
 - Standard `npm run` scripts (`dev`, `build`, `typecheck`, `lint`, `format`, `storybook`, …) are in `package.json`;
