@@ -137,31 +137,47 @@ type FullState = {
 This is the single object returned by `useState<FullState>` inside
 `useDiceCalculator()`.
 
-## 2. Constants
+## 2. Constants & Lookup Functions
 
-### 2.1 `TO_HIT_CHART`
+### 2.1 `lookupToHit(attackerWS, defenderWS)`
 
 `src/entities/dice/lib/charts.ts`
 
-```text
-export const TO_HIT_CHART = [
-  // Attacker WS = 1
-  ['4+', '4+', '5+', '5+', '5+', '5+', '5+', '5+', '5+', '5+'],
-  // Attacker WS = 2
-  ['3+', '4+', '4+', '4+', '5+', '5+', '5+', '5+', '5+', '5+'],
-  // ... rows 3..10 per research.md table
-] as const satisfies readonly (readonly DiceTargetString[])[];
+WHFB 8th Edition close-combat To Hit, encoded as a four-branch formula that
+returns a `DiceTargetString` (`"3+" | "4+" | "5+"`):
 
-type DiceTargetString = `${DiceTarget}+`;
+```text
+export function lookupToHit(attackerWS, defenderWS): DiceTargetString {
+  if (attackerWS > defenderWS)        return "3+";
+  if (attackerWS === defenderWS)      return "4+";
+  if (defenderWS > 2 * attackerWS)    return "5+";
+  return "4+";
+}
 ```
 
-Lookup: `TO_HIT_CHART[attackerWS - 1][defenderWS - 1]` returns a `DiceTargetString`
-(e.g., `"4+"`); the consumer parses to numeric via `parseTarget()`.
+Inputs are clamped to `[STAT_MIN, STAT_MAX]` (1..10). The returned string is
+parsed to a numeric target via `parseTarget()`. The formula matches every cell
+of the canonical 10×10 chart at <https://8th.whfb.app/close-combat/roll-to-hit-close-combat>.
 
-### 2.2 `TO_WOUND_CHART`
+### 2.2 `lookupToWound(strength, toughness)`
 
-Same shape as `TO_HIT_CHART`, indexed `TO_WOUND_CHART[strength - 1][toughness - 1]`.
-Values cover `'2+'` through `'6+'`.
+WHFB 8th Edition To Wound, encoded as a five-branch formula keyed on the S − T
+differential:
+
+```text
+export function lookupToWound(strength, toughness): DiceTargetString {
+  const diff = strength - toughness;
+  if (diff >= 2)   return "2+";   // S two or more higher than T
+  if (diff === 1)  return "3+";   // S one higher
+  if (diff === 0)  return "4+";   // equal
+  if (diff === -1) return "5+";   // T one higher
+  return "6+";                    // T two or more higher
+}
+```
+
+Within S 1..10 × T 1..10 the chart caps at 6+ — there is no "cannot wound"
+within that range. Unrollable wounds (target ≥ 7 after modifiers) are handled
+by `clampAndFormat` per FR-T05.
 
 ### 2.3 `MODIFIER_CONFIGS`
 

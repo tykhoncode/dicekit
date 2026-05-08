@@ -17,8 +17,6 @@ export type {
 } from "./model/types";
 
 export {
-  TO_HIT_CHART,
-  TO_WOUND_CHART,
   STAT_MIN,
   STAT_MAX,
   lookupToHit,

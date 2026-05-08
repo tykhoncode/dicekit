@@ -57,7 +57,7 @@ story. Run `npx vitest` to verify the new stories pass.
 ## 3. Implementation order (matches Phase 1 layering)
 
 1. **Domain layer — `entities/dice/`** (no UI dependency, fastest to test):
-   1. Add `lib/charts.ts` with `TO_HIT_CHART` + `TO_WOUND_CHART` const arrays per
+   1. Add `lib/charts.ts` with `lookupToHit` + `lookupToWound` formula functions per
       `research.md` §1.1 / §1.2.
    2. Add `model/types.ts` with the types from `data-model.md` §1.
    3. Add `model/modifiers.ts` with `MODIFIER_CONFIGS` per `data-model.md` §2.3.

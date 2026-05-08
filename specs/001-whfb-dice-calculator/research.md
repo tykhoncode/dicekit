@@ -11,67 +11,57 @@ implementation research done in `/speckit-plan` Phase 0. Each section follows
 
 ### 1.1 To Hit chart (close combat)
 
-**Decision**: Encode the full 10×10 close-combat To Hit lookup as a frozen
-`readonly` 2D const array `TO_HIT_CHART[attackerWS - 1][defenderWS - 1]` in
-`src/entities/dice/lib/charts.ts`, with values typed as the literal union
+**Decision**: Encode the WHFB 8th Edition close-combat To Hit lookup as a four-
+branch formula in `lookupToHit(attackerWS, defenderWS)` inside
+`src/entities/dice/lib/charts.ts`, returning values typed as the literal union
 `"3+" | "4+" | "5+"`.
 
-**Rationale**: The chart is small, static, and authoritative. A direct lookup is
-O(1), preserves type safety (`as const` narrows to literal types), and reads exactly
-like the source rulebook. WS values 1–10 line up with array indices 0–9.
+```ts
+if (attackerWS > defenderWS) return "3+";
+if (attackerWS === defenderWS) return "4+";
+if (defenderWS > 2 * attackerWS) return "5+";
+return "4+";
+```
 
-**Source values** (verified against
-<https://8th.whfb.app/close-combat/roll-to-hit-close-combat>):
-
-| A\D | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | 10  |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1   | 4+  | 4+  | 5+  | 5+  | 5+  | 5+  | 5+  | 5+  | 5+  | 5+  |
-| 2   | 3+  | 4+  | 4+  | 4+  | 5+  | 5+  | 5+  | 5+  | 5+  | 5+  |
-| 3   | 3+  | 3+  | 4+  | 4+  | 4+  | 4+  | 5+  | 5+  | 5+  | 5+  |
-| 4   | 3+  | 3+  | 3+  | 4+  | 4+  | 4+  | 4+  | 4+  | 5+  | 5+  |
-| 5   | 3+  | 3+  | 3+  | 3+  | 4+  | 4+  | 4+  | 4+  | 4+  | 4+  |
-| 6   | 3+  | 3+  | 3+  | 3+  | 3+  | 4+  | 4+  | 4+  | 4+  | 4+  |
-| 7   | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 4+  | 4+  | 4+  | 4+  |
-| 8   | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 4+  | 4+  | 4+  |
-| 9   | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 4+  | 4+  |
-| 10  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 3+  | 4+  |
+**Rationale**: The formula reproduces every cell of the canonical 10×10 chart at
+<https://8th.whfb.app/close-combat/roll-to-hit-close-combat> (verified by walking
+all 100 cells). It's self-documenting (a reader who knows WHFB sees the rule
+directly), shorter to maintain than a literal `as const` array, and the unit
+tests in `compute.spec.ts` assert outputs against rulebook cells so any drift
+would be caught immediately.
 
 **Alternatives considered**:
 
-- _Formula instead of table_: derive via `if A > D → 3+, A == D → 4+, D > 2A → 5+,
-else 4+`. Rejected because the formula has subtle bands (e.g., "more than double"
-  edges) that the actual chart deviates from in a few cells; encoding the chart is
-  faithful and zero-risk.
-- _Object map keyed by `${a}x${d}`_: rejected for memory and lookup overhead vs. the
-  arr-of-arr.
+- _Literal 10×10 `as const` array_: was the original approach. Reads "exactly like
+  the rulebook", but adds ~20 lines of typed literal data that buy nothing the
+  formula doesn't already give us. Refactored away once the formula was proven
+  cell-for-cell faithful.
+- _Object map keyed by `${a}x${d}`_: rejected for the same reason — extra
+  overhead, no readability win.
 
 ### 1.2 To Wound chart (close combat)
 
-**Decision**: Encode the full 10×10 To Wound lookup as a frozen `readonly` 2D const
-array `TO_WOUND_CHART[strength - 1][toughness - 1]`. Cells off the chart (S1 vs
-T7+, etc.) are stored as the literal `"6+"` (chart maximum) per the canonical
-source. The "cannot wound" surface (e.g., a hypothetical S0 attack) is handled by
-input validation that prevents Strength from going below 1.
+**Decision**: Encode the WHFB 8th Edition To Wound lookup as a five-branch
+formula in `lookupToWound(strength, toughness)`, keyed on the S − T differential.
 
-**Rationale**: Same as 1.1 — small, authoritative, O(1).
+```ts
+const diff = strength - toughness;
+if (diff >= 2) return "2+"; // S two or more higher than T
+if (diff === 1) return "3+"; // S one higher
+if (diff === 0) return "4+"; // equal
+if (diff === -1) return "5+"; // T one higher
+return "6+"; // T two or more higher
+```
 
-**Source values** (verified against
-<https://8th.whfb.app/close-combat/roll-to-wound-close-combat>):
+**Rationale**: Same as §1.1 — the formula matches every cell of the canonical
+10×10 chart at <https://8th.whfb.app/close-combat/roll-to-wound-close-combat>
+(verified). The "cannot wound" surface is intentionally absent within the
+S 1..10 × T 1..10 range — the chart caps at 6+ — so no special-casing is needed
+beyond the formula's `return "6+"` fallthrough. Unrollable wounds (target ≥ 7
+after modifiers, e.g., -1 to wound on a 6+) are handled by `clampAndFormat`
+per FR-T05.
 
-| S\T | 1   | 2   | 3   | 4   | 5   | 6   | 7   | 8   | 9   | 10  |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1   | 4+  | 5+  | 6+  | 6+  | 6+  | 6+  | 6+  | 6+  | 6+  | 6+  |
-| 2   | 3+  | 4+  | 5+  | 6+  | 6+  | 6+  | 6+  | 6+  | 6+  | 6+  |
-| 3   | 2+  | 3+  | 4+  | 5+  | 6+  | 6+  | 6+  | 6+  | 6+  | 6+  |
-| 4   | 2+  | 2+  | 3+  | 4+  | 5+  | 6+  | 6+  | 6+  | 6+  | 6+  |
-| 5   | 2+  | 2+  | 2+  | 3+  | 4+  | 5+  | 6+  | 6+  | 6+  | 6+  |
-| 6   | 2+  | 2+  | 2+  | 2+  | 3+  | 4+  | 5+  | 6+  | 6+  | 6+  |
-| 7   | 2+  | 2+  | 2+  | 2+  | 2+  | 3+  | 4+  | 5+  | 6+  | 6+  |
-| 8   | 2+  | 2+  | 2+  | 2+  | 2+  | 2+  | 3+  | 4+  | 5+  | 6+  |
-| 9   | 2+  | 2+  | 2+  | 2+  | 2+  | 2+  | 2+  | 3+  | 4+  | 5+  |
-| 10  | 2+  | 2+  | 2+  | 2+  | 2+  | 2+  | 2+  | 2+  | 3+  | 4+  |
-
-**Alternatives considered**: same as 1.1.
+**Alternatives considered**: same as §1.1.
 
 ### 1.3 Sign convention
 

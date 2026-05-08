@@ -113,7 +113,7 @@ src/
 │       │   ├── defaults.ts                   # default WS/S/T/AS/Ward + factory createInitialState()
 │       │   └── modifiers.ts                  # MODIFIER_CONFIGS — config arrays per card (FR-012/015/018/021)
 │       └── lib/
-│           ├── charts.ts                     # TO_HIT_CHART, TO_WOUND_CHART (10×10 const arrays)
+│           ├── charts.ts                     # lookupToHit / lookupToWound formula functions
 │           ├── compute.ts                    # computeRequiredRoll, computeProbabilities, unsavedWoundProb
 │           ├── compute.spec.ts               # Vitest unit tests for the pure helpers
 │           ├── format.ts                     # formatTarget, formatProbability, formatOutcome
