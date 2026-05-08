@@ -24,7 +24,7 @@ export function ModifierToggleRow({
         className,
       )}
     >
-      <span className="flex items-center gap-2.5 text-xs">
+      <span className="flex items-center gap-2.5 text-sm">
         <Switch
           checked={active}
           onCheckedChange={() => onToggle()}
@@ -35,8 +35,8 @@ export function ModifierToggleRow({
         />
         <span
           className={cn(
-            "select-none",
-            active ? "text-foreground" : "text-muted-foreground",
+            "select-none font-medium",
+            active ? "text-foreground" : "text-foreground/80",
           )}
         >
           {label}
@@ -45,7 +45,7 @@ export function ModifierToggleRow({
       <Badge
         variant={active ? "default" : "outline"}
         className={cn(
-          "tabular-nums",
+          "text-sm tabular-nums",
           active &&
             "border-transparent bg-[color:var(--accent-active)] text-white",
         )}

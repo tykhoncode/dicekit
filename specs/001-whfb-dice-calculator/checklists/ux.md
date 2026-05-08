@@ -18,7 +18,7 @@
 
 ## Requirement Clarity
 
-- [ ] CHK009 Is "premium dark SaaS / tactical analytics" quantified beyond the reference image — e.g., specific spacing scale, border radius, border width? [Clarity, Spec §FR-033]
+- [ ] CHK009 Is "premium dark SaaS / tactical analytics" quantified — e.g., specific spacing scale, border radius, border width? [Clarity, Spec §FR-033]
 - [ ] CHK010 Is "subtle glow" pinned to a specific CSS treatment (color, opacity, blur radius, spread)? [Clarity, Spec §FR-033 / Research §2.3]
 - [ ] CHK011 Is "compact spacing" pinned to specific Tailwind spacing tokens or px values? [Clarity, Spec §FR-033]
 - [ ] CHK012 Is "thin borders" pinned to a specific border width (1px? hairline?) and color token? [Clarity, Spec §FR-033]
@@ -36,7 +36,7 @@
 
 ## Acceptance Criteria Quality
 
-- [ ] CHK021 Can "structural parity vs `.artifacts/screenshots/image.png`" (SC-007) be objectively verified, or is it inherently subjective? [Measurability, Spec §SC-007]
+- [ ] CHK021 Can "structural parity" (SC-007) be objectively verified by walking the FR-001..FR-005 region list, or is it inherently subjective? [Measurability, Spec §SC-007]
 - [ ] CHK022 Can "no scrolling on a 1280-px-wide desktop viewport" (SC-002) be objectively verified by an automated viewport test? [Measurability, Spec §SC-002]
 - [ ] CHK023 Can "update within one user-perceivable frame" (SC-003) be measured without a perf benchmark, or is it implicitly satisfied by O(1) compute? [Measurability, Spec §SC-003]
 

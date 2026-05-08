@@ -43,10 +43,9 @@ Follow-up TODOs: none.
 
 ### I. Visual Fidelity & Reference-Driven UI
 
-DiceKit is a UI-first product. When a reference design is supplied (e.g.
-`.artifacts/screenshots/image.png`), it is the source of truth for layout,
-hierarchy, spacing density, and visual tone. Implementation MUST match the
-reference's UI structure (regions, ordering, grouping) and aesthetic intent
+DiceKit is a UI-first product. The spec's region / ordering / grouping
+requirements are the source of truth for layout. Implementation MUST
+match the spec's stated UI structure and aesthetic intent
 (premium dark SaaS / tactical analytics — NOT fantasy parchment, skulls, or
 HUD ornaments). Pixel-perfect parity is NOT required where shadcn primitives
 or Inter (the bundled variable font) diverge from the reference; structural

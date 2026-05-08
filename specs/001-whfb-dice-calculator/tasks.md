@@ -130,7 +130,7 @@ e2e in `tests/`.
 
 **Purpose**: visual fidelity pass, accessibility audit, convention enforcement, and the full pre-merge gate.
 
-- [x] T042 [P] Compare the rendered page side-by-side with `.artifacts/screenshots/image.png` per `quickstart.md` §7. Tune card spacing density, corner radius, border subtlety, and the `--card-glow` token until structural parity passes (SC-007). NO layout changes — only visual polish (FR-037).
+- [x] T042 [P] Walk the rendered page against the FR-001..FR-005 region list per `quickstart.md` §7. Tune card spacing density, corner radius, border subtlety, and the `--card-glow` token until SC-007 passes. NO layout changes — only visual polish (FR-037).
 - [x] T043 [P] Run the Storybook a11y addon (`@storybook/addon-a11y`) against every new story file via `npx vitest`. Resolve any axe violations surfaced — typical fixes are missing `aria-label` on icon-only buttons and label associations on `NumberStepper` value displays.
 - [x] T044 [P] Audit every new file under `src/entities/`, `src/features/`, `src/pages/calculator/`, `src/shared/ui/` for Constitution Principle III compliance: named exports only, `cn()` import is from `@/shared/lib/classnames`, no relative `../` paths, `import type` for type-only imports, no enums/namespaces, no comments unless JSDoc on exported public API. Fix any deviations.
 - [x] T045 Run the pre-merge gate: `npm run lint && npm run format:check && npm run typecheck && npm run build && npx vitest run`. Fix any failures (do NOT bypass with `--no-verify` or similar).

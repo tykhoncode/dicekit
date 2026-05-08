@@ -332,8 +332,8 @@ visual tuning:
 4. Summary panel below with Combat Sequence (left) + Estimated Outcome (right).
 
 Only after structural parity passes does visual tuning (spacing density, glow,
-border subtlety) start. The reference image at `.artifacts/screenshots/image.png`
-is the final visual check. SC-007 mandates this structural-first comparison.
+border subtlety) start. SC-007 anchors this structural-first verification on
+the FR-001..FR-005 region list in the spec.
 
 ## 7. Out of scope (v1) — confirmed
 

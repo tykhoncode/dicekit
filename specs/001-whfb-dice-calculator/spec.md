@@ -4,9 +4,9 @@
 **Created**: 2026-05-06
 **Status**: Draft
 **Input**: User description: "Build a full-screen desktop web app UI for DiceKit … polished
-dark-mode Warhammer Fantasy Battle 8th Edition dice calculator page matching the attached
-reference design … 4 equal calculator cards (To Hit, To Wound, Armour Save, Ward Save) with
-steppers, modifier toggles, and result panels, plus a bottom combat-sequence summary."
+dark-mode Warhammer Fantasy Battle 8th Edition dice calculator page … 4 equal calculator
+cards (To Hit, To Wound, Armour Save, Ward Save) with steppers, modifier toggles, and
+result panels, plus a bottom combat-sequence summary."
 
 ## Clarifications
 
@@ -124,7 +124,7 @@ others are visible placeholders so the layout is correct but they do nothing on 
 
 **Why this priority**: Reset All is a quality-of-life feature, not a core calculation
 feature. The other three controls are layout placeholders so the visual structure
-matches the reference design and downstream feature work has a hook to land in.
+matches the spec and downstream feature work has a hook to land in.
 
 **Independent Test**: Modify several cards' state, click "Reset All", and confirm
 every card returns to its documented default values and all modifier toggles return
@@ -432,11 +432,11 @@ Strength = Strength + sum(active Strength-source modifiers)`; they MUST NOT
   selectors) are reachable and operable using a keyboard alone.
 - **SC-006**: When a modifier is active, a colour-blind user can identify its state
   from non-colour cues (switch position, label) at least as reliably as from colour.
-- **SC-007**: A reviewer comparing the rendered page side-by-side with the supplied
-  reference design (`.artifacts/screenshots/image.png`) confirms structural parity:
-  every named region (top bar with all four right-side controls, four-card row in
-  the documented order, summary panel with both halves) is present and ordered as
-  in the reference.
+- **SC-007**: A reviewer reading the page top-to-bottom confirms every named region
+  from FR-001 through FR-005 is present and ordered as specified: top bar with all
+  four right-side controls (Load Preset, Share, Reset All, Settings), four-card row
+  in the documented order (To Hit → To Wound → Armour Save → Ward Save), and a
+  summary panel below with both halves (Combat Sequence + Estimated Outcome).
 
 ## Assumptions
 
@@ -467,9 +467,8 @@ Strength = Strength + sum(active Strength-source modifiers)`; they MUST NOT
   the WHFB natural-1 / natural-6 rules.
 - Desktop is the priority target. The grid MAY collapse to fewer columns at narrower
   widths, but no mobile-specific layout work is required for v1.
-- The visible font (Inter, already bundled in the project) is acceptable as a
-  substitute for any specific font shown in the reference image; visual parity does
-  not require font matching.
+- The visible font is Inter (already bundled in the project); no specific font
+  match is required.
 - The four-card layout is frozen for v1 and subsequent patches (FR-037). Polishing
   passes will rework column content and math but not the layout. WHFB rules that
   do not fit the layout are deferred to `future-rules-backlog.md` in this feature

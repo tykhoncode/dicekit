@@ -32,8 +32,8 @@
 ## Notes
 
 - Items marked incomplete require spec updates before `/speckit-clarify` or `/speckit-plan`.
-- The reference image at `.artifacts/screenshots/image.png` is mentioned in SC-007 as an
-  external visual orienteer; the requirement is structural parity, not pixel parity.
+- SC-007's structural-parity requirement is anchored on the FR-001..FR-005 region
+  list in `spec.md` — region presence + ordering, not pixel parity.
 - FR-032 documents that v1 ships the four core WHFB 8th Edition charts (To Hit, To Wound,
   Armour Save, Ward Save) directly in code per FR-T01..FR-T05. The broader rules-engine
   territory (army books, magic items, special unit abilities, shooting BS chart,

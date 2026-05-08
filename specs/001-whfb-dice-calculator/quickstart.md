@@ -159,8 +159,8 @@ All six steps MUST pass green. The `PostToolUse` hook auto-runs Prettier +
 Before declaring the feature done:
 
 1. Open the dev server, dark theme.
-2. Open `.artifacts/screenshots/image.png` side-by-side.
-3. Verify structural parity:
+2. Walk through the spec's FR-001..FR-005 region list and verify structural
+   presence + ordering:
    - Top bar: brand mark + DiceKit/subtitle on left; Load Preset / Share /
      Reset All / Settings cluster on right.
    - Four cards in one row, in the order To Hit → To Wound → Armour Save → Ward
@@ -168,12 +168,12 @@ Before declaring the feature done:
    - Each card has the four regions (header / inputs / modifiers / result).
    - Summary panel below with Combat Sequence on the left and Estimated Outcome
      on the right.
-4. Verify default text matches §4 above.
-5. Toggle a few modifiers; confirm the green active accent (FR-009) and gold/
+3. Verify default text matches §4 above.
+4. Toggle a few modifiers; confirm the green active accent (FR-009) and gold/
    orange result accent (FR-010).
 
-Pixel-level deviations (Inter vs the reference's font, exact corner radius, etc.)
-are accepted per the spec's Assumptions section.
+Visual polish (corner radius, glow, exact spacing) is iterated in-app rather
+than against an external reference.
 
 ## 8. When you finish
 
@@ -202,7 +202,6 @@ a PR directly using `/speckit-git-commit` and `gh pr create`.
 
 - Canonical WHFB 8th Edition rules: <https://8th.whfb.app/>
   (saved to user memory as `reference_whfb_rules.md`).
-- Reference design image: `.artifacts/screenshots/image.png`.
 - Constitution: `.specify/memory/constitution.md` — Principles I–V are the gating
   policy.
 - CLAUDE.md (repo root): the strict-TS, named-export, `cn()`, and `@/`-alias rules
