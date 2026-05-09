@@ -30,7 +30,17 @@ export type ModifierEffect =
   /** Forces the final to-hit target to a specific dice value (e.g.
    *  Master Rune of Snorri Spangelhelm — always hits on 2+). When
    *  multiple are active, the smallest target wins. */
-  | { kind: "force-target"; value: DiceTarget };
+  | { kind: "force-target"; value: DiceTarget }
+  /** Adjusts attacker Strength, defender Toughness, or both — used by
+   *  to-wound modifiers (weapons, spells like Wyssan's, faction stat
+   *  buffs). When `stat === "both"`, ModifierState.target picks which
+   *  side of the combat the buff lands on. */
+  | {
+      kind: "delta-stat";
+      stat: "S" | "T" | "both";
+      sign: -1 | 1;
+      magnitude?: number;
+    };
 
 export type ModifierId = string;
 
@@ -40,7 +50,10 @@ export type ModifierCategory =
   | "brb-artifact"
   | "race-ability"
   | "race-artifact"
-  | "terrain";
+  | "brb-weapon"
+  | "race-weapon"
+  | "terrain"
+  | "custom";
 
 export type ModifierConfig = {
   id: ModifierId;

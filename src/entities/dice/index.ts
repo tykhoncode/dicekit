@@ -26,7 +26,7 @@ export {
   parseTarget,
 } from "./lib/charts";
 
-export { MODIFIER_CONFIGS, isStrengthSourceModifier } from "./model/modifiers";
+export { MODIFIER_CONFIGS } from "./model/modifiers";
 
 export { INITIAL_DEFAULTS, createInitialState } from "./model/defaults";
 

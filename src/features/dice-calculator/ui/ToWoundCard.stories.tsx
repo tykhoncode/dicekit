@@ -28,6 +28,16 @@ function Live({ activate = [] }: { activate?: ModifierId[] }) {
         result={calc.results.toWound}
         onSetStat={(key, value) => calc.actions.setStat("toWound", key, value)}
         onToggleModifier={(id) => calc.actions.toggleModifier("toWound", id)}
+        onSetModifierValue={(id, value) =>
+          calc.actions.setModifierValue("toWound", id, value)
+        }
+        onSetModifierValueDef={(id, value) =>
+          calc.actions.setModifierValueDef("toWound", id, value)
+        }
+        onSetModifierTarget={(id, target) =>
+          calc.actions.setModifierTarget("toWound", id, target)
+        }
+        onTogglePinned={(id) => calc.actions.togglePinned("toWound", id)}
       />
     </div>
   );
@@ -41,8 +51,6 @@ export const WithGreatWeapon: Story = {
   render: () => <Live activate={["toWound:greatWeapon"]} />,
 };
 
-export const EdgeCaseLowStrength: Story = {
-  render: () => (
-    <Live activate={["toWound:strengthDebuff", "toWound:curseHex"]} />
-  ),
+export const WithWyssansWildform: Story = {
+  render: () => <Live activate={["toWound:wyssansWildform"]} />,
 };

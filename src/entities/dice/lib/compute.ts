@@ -10,10 +10,7 @@ import type {
   Outcome,
   ProbabilityFraction,
 } from "@/entities/dice/model/types";
-import {
-  isStrengthSourceModifier,
-  MODIFIER_CONFIGS,
-} from "@/entities/dice/model/modifiers";
+import { MODIFIER_CONFIGS } from "@/entities/dice/model/modifiers";
 import {
   lookupToHit,
   lookupToWound,
@@ -27,21 +24,64 @@ const CONFIG_BY_ID = new Map<string, ModifierConfig>(
   MODIFIER_CONFIGS.map((c) => [c.id, c]),
 );
 
-function activeNumericModifierSum(
-  modifiers: readonly ModifierState[],
-  options: { includeStrengthSources: boolean },
+function numericContribution(
+  state: ModifierState,
+  config: ModifierConfig,
 ): number {
+  if (config.effect.kind !== "numeric") return 0;
+  const ev = config.effect.value;
+  if (!config.variableValue) return ev;
+  const sv = state.value ?? config.variableValue.default;
+  // variableValue with a negative minimum means the stepper carries a
+  // signed value (e.g. Custom ±To Hit -5..+5). Otherwise it's a positive
+  // magnitude that gets multiplied by the effect's sign (e.g. Plague of
+  // Rust effect.value=-1, variableValue 1-9 → contribution = -magnitude).
+  if (config.variableValue.min < 0) return sv;
+  return ev * sv;
+}
+
+function activeNumericModifierSum(modifiers: readonly ModifierState[]): number {
   let total = 0;
   for (const state of modifiers) {
     if (!state.active) continue;
-    if (!options.includeStrengthSources && isStrengthSourceModifier(state.id)) {
-      continue;
-    }
     const config = CONFIG_BY_ID.get(state.id);
     if (!config || config.effect.kind !== "numeric") continue;
-    total += config.effect.value;
+    total += numericContribution(state, config);
   }
   return total;
+}
+
+function activeDeltaStat(modifiers: readonly ModifierState[]): {
+  attackerS: number;
+  defenderT: number;
+} {
+  let attackerS = 0;
+  let defenderT = 0;
+  for (const state of modifiers) {
+    if (!state.active) continue;
+    const config = CONFIG_BY_ID.get(state.id);
+    if (config?.effect.kind !== "delta-stat") continue;
+    const sign = config.effect.sign;
+    const fixedMag = config.effect.magnitude;
+    const fallback = config.variableValue?.default ?? 1;
+    const valueAtk = fixedMag ?? state.value ?? fallback;
+    const valueDef = fixedMag ?? state.valueDef ?? state.value ?? fallback;
+    const stat = config.effect.stat;
+    if (stat === "S") {
+      attackerS += sign * valueAtk;
+    } else if (stat === "T") {
+      defenderT += sign * valueAtk;
+    } else {
+      const target = state.target ?? "attacker";
+      if (target === "attacker") attackerS += sign * valueAtk;
+      else if (target === "defender") defenderT += sign * valueAtk;
+      else {
+        attackerS += sign * valueAtk;
+        defenderT += sign * valueDef;
+      }
+    }
+  }
+  return { attackerS, defenderT };
 }
 
 function hasActiveReplaceWard(modifiers: readonly ModifierState[]): boolean {
@@ -66,9 +106,13 @@ function activeAutoResult(
 
 export function getEffectiveStrength(toWound: CardState): number {
   const base = toWound.inputs.strength ?? INITIAL_DEFAULTS.strength;
-  const buff = activeNumericModifierSum(toWound.modifiers, {
-    includeStrengthSources: true,
-  });
+  const buff = activeDeltaStat(toWound.modifiers).attackerS;
+  return base + buff;
+}
+
+export function getEffectiveToughness(toWound: CardState): number {
+  const base = toWound.inputs.toughness ?? INITIAL_DEFAULTS.toughness;
+  const buff = activeDeltaStat(toWound.modifiers).defenderT;
   return base + buff;
 }
 
@@ -113,7 +157,10 @@ function activeForceWS(
     const config = CONFIG_BY_ID.get(state.id);
     if (config?.effect.kind !== "force-ws") continue;
     if (!inPhase(config, phase)) continue;
-    const value = config.effect.value;
+    // variable force-ws mods (Custom WS) override effect.value with state.value
+    const value = config.variableValue
+      ? (state.value ?? config.effect.value)
+      : config.effect.value;
     const target = resolvedTarget(state, config);
     if (target === "attacker" || target === "both") apply("attacker", value);
     if (target === "defender" || target === "both") apply("defender", value);
@@ -154,7 +201,9 @@ function activeForceTarget(modifiers: readonly ModifierState[]): number | null {
     if (!state.active) continue;
     const config = CONFIG_BY_ID.get(state.id);
     if (config?.effect.kind !== "force-target") continue;
-    const v = config.effect.value;
+    const v = config.variableValue
+      ? (state.value ?? config.effect.value)
+      : config.effect.value;
     target = target === null ? v : Math.min(target, v);
   }
   return target;
@@ -204,9 +253,7 @@ function explainToHit(toHit: CardState): CardBreakdown {
   d = clampWS(d + postDelta.defender);
 
   const chartTarget = parseTarget(lookupToHit(a, d));
-  const modSum = activeNumericModifierSum(toHit.modifiers, {
-    includeStrengthSources: false,
-  });
+  const modSum = activeNumericModifierSum(toHit.modifiers);
   const computed = chartTarget - modSum;
 
   const steps: string[] = [
@@ -226,19 +273,25 @@ function explainToHit(toHit: CardState): CardBreakdown {
 
 function explainToWound(toWound: CardState): CardBreakdown {
   const baseS = toWound.inputs.strength ?? INITIAL_DEFAULTS.strength;
+  const baseT = toWound.inputs.toughness ?? INITIAL_DEFAULTS.toughness;
   const effectiveS = getEffectiveStrength(toWound);
-  const t = toWound.inputs.toughness ?? INITIAL_DEFAULTS.toughness;
-  const chartTarget = parseTarget(lookupToWound(effectiveS, t));
-  const directModSum = activeNumericModifierSum(toWound.modifiers, {
-    includeStrengthSources: false,
-  });
-  const raw = chartTarget - directModSum;
+  const effectiveT = getEffectiveToughness(toWound);
+  const chartTarget = parseTarget(lookupToWound(effectiveS, effectiveT));
+  const directModSum = activeNumericModifierSum(toWound.modifiers);
+  const computed = chartTarget - directModSum;
 
   const steps: string[] = [
-    `S ${statLabel(baseS, effectiveS)} vs T ${t} → ${chartTarget}+`,
-    `mods ${signed(directModSum)} → ${formatTargetForStep(raw)}`,
+    `S ${statLabel(baseS, effectiveS)} vs T ${statLabel(baseT, effectiveT)} → ${chartTarget}+`,
+    `mods ${signed(directModSum)} → ${formatTargetForStep(computed)}`,
   ];
-  return { rawTarget: raw, steps };
+
+  const forced = activeForceTarget(toWound.modifiers);
+  if (forced !== null) {
+    const finalTarget = Math.min(forced, Math.max(1, Math.round(computed)));
+    steps.push(`forced → ${forced}+`);
+    return { rawTarget: finalTarget, steps };
+  }
+  return { rawTarget: computed, steps };
 }
 
 function explainArmourSave(
@@ -246,9 +299,7 @@ function explainArmourSave(
   effectiveStrength: number,
   base: DiceTarget,
 ): CardBreakdown {
-  const modSum = activeNumericModifierSum(armourSave.modifiers, {
-    includeStrengthSources: false,
-  });
+  const modSum = activeNumericModifierSum(armourSave.modifiers);
   const strengthPenalty = -Math.max(0, effectiveStrength - 3);
   const afterStrength = base - strengthPenalty;
   const raw = afterStrength - modSum;
@@ -260,13 +311,18 @@ function explainArmourSave(
     );
   }
   steps.push(`mods ${signed(modSum)} → ${formatTargetForStep(raw)}`);
+
+  const forced = activeForceTarget(armourSave.modifiers);
+  if (forced !== null) {
+    const finalTarget = Math.min(forced, Math.max(1, Math.round(raw)));
+    steps.push(`forced → ${forced}+`);
+    return { rawTarget: finalTarget, steps };
+  }
   return { rawTarget: raw, steps };
 }
 
 function explainWardSave(wardSave: CardState, base: DiceTarget): CardBreakdown {
-  const modSum = activeNumericModifierSum(wardSave.modifiers, {
-    includeStrengthSources: false,
-  });
+  const modSum = activeNumericModifierSum(wardSave.modifiers);
   let raw = base - modSum;
   const hasParry = hasActiveReplaceWard(wardSave.modifiers);
   if (hasParry) raw = Math.min(raw, PARRY_WARD_VALUE);
@@ -276,6 +332,15 @@ function explainWardSave(wardSave: CardState, base: DiceTarget): CardBreakdown {
     `mods ${signed(modSum)} → ${formatTargetForStep(raw)}`,
   ];
   if (hasParry) steps.push(`Parry floor ${PARRY_WARD_VALUE}+`);
+
+  // force-target on ward: any active "ward N+" or Regeneration grant
+  // sets the target to AT MOST that value (smallest wins).
+  const forced = activeForceTarget(wardSave.modifiers);
+  if (forced !== null) {
+    const finalTarget = Math.min(forced, Math.max(1, Math.round(raw)));
+    steps.push(`forced → ${forced}+`);
+    return { rawTarget: finalTarget, steps };
+  }
   return { rawTarget: raw, steps };
 }
 

@@ -39,18 +39,48 @@ export function CalculatorPage() {
           result={results.toWound}
           onSetStat={(key, value) => actions.setStat("toWound", key, value)}
           onToggleModifier={(id) => actions.toggleModifier("toWound", id)}
+          onSetModifierValue={(id, value) =>
+            actions.setModifierValue("toWound", id, value)
+          }
+          onSetModifierValueDef={(id, value) =>
+            actions.setModifierValueDef("toWound", id, value)
+          }
+          onSetModifierTarget={(id, target) =>
+            actions.setModifierTarget("toWound", id, target)
+          }
+          onTogglePinned={(id) => actions.togglePinned("toWound", id)}
         />
         <ArmourSaveCard
           state={state.armourSave}
           result={results.armourSave}
           onSetSaveTarget={(v) => actions.setSaveTarget("armourSave", v)}
           onToggleModifier={(id) => actions.toggleModifier("armourSave", id)}
+          onSetModifierValue={(id, value) =>
+            actions.setModifierValue("armourSave", id, value)
+          }
+          onSetModifierValueDef={(id, value) =>
+            actions.setModifierValueDef("armourSave", id, value)
+          }
+          onSetModifierTarget={(id, target) =>
+            actions.setModifierTarget("armourSave", id, target)
+          }
+          onTogglePinned={(id) => actions.togglePinned("armourSave", id)}
         />
         <WardSaveCard
           state={state.wardSave}
           result={results.wardSave}
           onSetSaveTarget={(v) => actions.setSaveTarget("wardSave", v)}
           onToggleModifier={(id) => actions.toggleModifier("wardSave", id)}
+          onSetModifierValue={(id, value) =>
+            actions.setModifierValue("wardSave", id, value)
+          }
+          onSetModifierValueDef={(id, value) =>
+            actions.setModifierValueDef("wardSave", id, value)
+          }
+          onSetModifierTarget={(id, target) =>
+            actions.setModifierTarget("wardSave", id, target)
+          }
+          onTogglePinned={(id) => actions.togglePinned("wardSave", id)}
         />
       </CalculatorGrid>
       <SummaryPanel results={results} outcome={outcome} />

@@ -72,6 +72,7 @@ export function ToHitCard({
     const spells: ModifierConfig[] = [];
     const brbArtifacts: ModifierConfig[] = [];
     const terrain: ModifierConfig[] = [];
+    const custom: ModifierConfig[] = [];
     const racialArtifactsMap = new Map<string, ModifierConfig[]>();
     const racialAbilitiesMap = new Map<string, ModifierConfig[]>();
     for (const c of TO_HIT_MODIFIERS) {
@@ -102,6 +103,9 @@ export function ToHitCard({
         case "terrain":
           terrain.push(c);
           break;
+        case "custom":
+          custom.push(c);
+          break;
       }
     }
     const sortByRace = <T,>(map: Map<string, T>): [string, T][] =>
@@ -129,6 +133,7 @@ export function ToHitCard({
         );
       }),
       terrain: sorted(terrain),
+      custom: sorted(custom),
     };
   }, []);
 
@@ -143,6 +148,7 @@ export function ToHitCard({
         ...groupedConfigs.spells.filter(isAutoResult),
         ...groupedConfigs.brbArtifacts.filter(isAutoResult),
         ...groupedConfigs.terrain.filter(isAutoResult),
+        ...groupedConfigs.custom.filter(isAutoResult),
         ...groupedConfigs.racialArtifacts.flatMap((g) =>
           g.items.filter(isAutoResult),
         ),
@@ -183,6 +189,7 @@ export function ToHitCard({
     racialArtifacts: stripPinnedRaceArr(groupedConfigs.racialArtifacts),
     racialAbilities: stripPinned(groupedConfigs.racialAbilities),
     terrain: stripPinned(groupedConfigs.terrain),
+    custom: stripPinned(groupedConfigs.custom),
   };
 
   const toneFor = (c: ModifierConfig): ModifierTone => {
@@ -202,9 +209,15 @@ export function ToHitCard({
   const renderRow: RenderRow = (config, toneOverride) => {
     const modState = stateById.get(config.id);
     const active = modState?.active ?? false;
-    const fallback = config.variableValue?.default ?? 1;
-    const value = modState?.value ?? fallback;
-    const valueDef = modState?.valueDef ?? fallback;
+    const variable = config.variableValue;
+    // Only thread state.value/valueDef into the badge label and the stepper
+    // when the modifier actually has a variableValue spec — otherwise the
+    // badge would shadow the static effect.value (e.g. "WS 1" for Speed of
+    // Light instead of "WS 10").
+    const value = variable ? (modState?.value ?? variable.default) : undefined;
+    const valueDef = variable
+      ? (modState?.valueDef ?? variable.default)
+      : undefined;
     const wsEffect =
       config.effect.kind === "force-ws" || config.effect.kind === "delta-ws"
         ? config.effect
@@ -213,13 +226,16 @@ export function ToHitCard({
     const target: "attacker" | "defender" | "both" | undefined =
       modState?.target ?? wsEffect?.target;
     const showSecondStepper =
-      isWsEffect && target === "both" && Boolean(config.variableValue);
-    const variable = config.variableValue;
+      isWsEffect && target === "both" && Boolean(variable);
     return (
       <ModifierToggleRow
         key={config.id}
         label={config.label}
-        effectLabel={effectLabel(config.effect, value, { target, valueDef })}
+        effectLabel={effectLabel(config.effect, value, {
+          target,
+          valueDef,
+          variableMin: variable?.min,
+        })}
         active={active}
         onToggle={() => onToggleModifier(config.id)}
         tone={toneOverride ?? toneFor(config)}
@@ -231,7 +247,7 @@ export function ToHitCard({
         valueStepper={
           variable
             ? {
-                value,
+                value: modState?.value ?? variable.default,
                 onChange: (v) => onSetModifierValue(config.id, v),
                 min: variable.min,
                 max: variable.max,
@@ -242,7 +258,7 @@ export function ToHitCard({
         valueStepperDef={
           showSecondStepper && variable
             ? {
-                value: valueDef,
+                value: modState?.valueDef ?? variable.default,
                 onChange: (v) => onSetModifierValueDef(config.id, v),
                 min: variable.min,
                 max: variable.max,
@@ -306,7 +322,7 @@ export function ToHitCard({
             groups.racialArtifacts.length > 0) && (
             <ModifierGroup title="Artifacts & Upgrades">
               {groups.brbArtifacts.length > 0 && (
-                <ModifierGroup title="BRB" level={1}>
+                <ModifierGroup title="Core Rulebook (BRB)" level={1}>
                   {groups.brbArtifacts.map((c) => renderRow(c, "artifact"))}
                 </ModifierGroup>
               )}
@@ -319,6 +335,11 @@ export function ToHitCard({
                   ))}
                 </ModifierGroup>
               )}
+            </ModifierGroup>
+          )}
+          {groups.custom.length > 0 && (
+            <ModifierGroup title="Custom">
+              {groups.custom.map((c) => renderRow(c, "default"))}
             </ModifierGroup>
           )}
         </>

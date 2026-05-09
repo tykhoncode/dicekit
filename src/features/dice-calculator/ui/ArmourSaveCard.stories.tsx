@@ -36,6 +36,16 @@ function Live({
         result={calc.results.armourSave}
         onSetSaveTarget={(v) => calc.actions.setSaveTarget("armourSave", v)}
         onToggleModifier={(id) => calc.actions.toggleModifier("armourSave", id)}
+        onSetModifierValue={(id, value) =>
+          calc.actions.setModifierValue("armourSave", id, value)
+        }
+        onSetModifierValueDef={(id, value) =>
+          calc.actions.setModifierValueDef("armourSave", id, value)
+        }
+        onSetModifierTarget={(id, target) =>
+          calc.actions.setModifierTarget("armourSave", id, target)
+        }
+        onTogglePinned={(id) => calc.actions.togglePinned("armourSave", id)}
       />
     </div>
   );

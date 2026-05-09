@@ -10,12 +10,13 @@ import {
   TooltipTrigger,
 } from "./tooltip";
 
-export type ModifierTone = "default" | "spell" | "artifact";
+export type ModifierTone = "default" | "spell" | "artifact" | "weapon";
 
 const TONE_VAR: Record<ModifierTone, string> = {
   default: "var(--accent-active)",
   spell: "var(--accent-spell)",
   artifact: "var(--accent-artifact)",
+  weapon: "var(--accent-weapon)",
 };
 
 export type ModifierValueStepper = {

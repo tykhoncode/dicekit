@@ -28,6 +28,16 @@ function Live({ activate = [] }: { activate?: ModifierId[] }) {
         result={calc.results.wardSave}
         onSetSaveTarget={(v) => calc.actions.setSaveTarget("wardSave", v)}
         onToggleModifier={(id) => calc.actions.toggleModifier("wardSave", id)}
+        onSetModifierValue={(id, value) =>
+          calc.actions.setModifierValue("wardSave", id, value)
+        }
+        onSetModifierValueDef={(id, value) =>
+          calc.actions.setModifierValueDef("wardSave", id, value)
+        }
+        onSetModifierTarget={(id, target) =>
+          calc.actions.setModifierTarget("wardSave", id, target)
+        }
+        onTogglePinned={(id) => calc.actions.togglePinned("wardSave", id)}
       />
     </div>
   );

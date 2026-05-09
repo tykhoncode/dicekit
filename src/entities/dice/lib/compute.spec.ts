@@ -69,11 +69,17 @@ describe("sign convention (FR-018b)", () => {
 
   it("5+ AS with +1 modifier becomes 4+", () => {
     const state = createInitialState();
-    const shielded = withModifierActive(
-      { ...state.armourSave, inputs: { baseTarget: 5 as const } },
-      "armourSave:shield",
-    );
-    const raw = computeArmourSaveTarget(shielded, 0);
+    // Custom ±AS with state.value = 1 → +1 to save (lower target).
+    const buffed: typeof state.armourSave = {
+      ...state.armourSave,
+      inputs: { baseTarget: 5 as const },
+      modifiers: state.armourSave.modifiers.map((m) =>
+        m.id === "armourSave:customDelta"
+          ? { ...m, active: true, value: 1 }
+          : m,
+      ),
+    };
+    const raw = computeArmourSaveTarget(buffed, 0);
     expect(raw).toBe(4);
   });
 });
