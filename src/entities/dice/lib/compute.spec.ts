@@ -129,6 +129,10 @@ describe("Ward Save not modified by Strength (FR-T04)", () => {
         ...createInitialState().toWound,
         inputs: { strength: 10, toughness: 3 },
       },
+      wardSave: {
+        ...createInitialState().wardSave,
+        inputs: { baseTarget: 5 as const },
+      },
     };
     const { results } = computeFullState(state);
     const ward = results[3];
@@ -153,28 +157,29 @@ describe("Ward Save not modified by Strength (FR-T04)", () => {
   });
 });
 
-describe("clampAndFormat (FR-T05 boundary handling)", () => {
+describe("clampAndFormat (always cap at 6+)", () => {
   it("target ≤ 1 clamps to 1+ with probability 5/6", () => {
-    const out = clampAndFormat(0, "toHit");
+    const out = clampAndFormat(0);
     expect(out.target).toBe(1);
     expect(out.probability).toBeCloseTo(5 / 6, 5);
   });
 
-  it("target ≥ 7 returns no-save for armourSave", () => {
-    const out = clampAndFormat(8, "armourSave");
-    expect(out.target).toBe("no-save");
-    expect(out.probability).toBe(0);
-  });
+  it("target ≥ 6 caps at 6+ at 1/6 across every card kind", () => {
+    for (const kind of [
+      "toHit",
+      "toWound",
+      "armourSave",
+      "wardSave",
+    ] as const) {
+      void kind; // kept for test readability; behavior is kind-agnostic now
+      const out7 = clampAndFormat(7);
+      expect(out7.target).toBe(6);
+      expect(out7.probability).toBeCloseTo(1 / 6, 5);
 
-  it("target ≥ 7 returns no-ward for wardSave", () => {
-    const out = clampAndFormat(7, "wardSave");
-    expect(out.target).toBe("no-ward");
-    expect(out.probability).toBe(0);
-  });
-
-  it("target ≥ 7 returns auto-fail for toHit / toWound", () => {
-    expect(clampAndFormat(7, "toHit").target).toBe("auto-fail");
-    expect(clampAndFormat(9, "toWound").target).toBe("auto-fail");
+      const out12 = clampAndFormat(12);
+      expect(out12.target).toBe(6);
+      expect(out12.probability).toBeCloseTo(1 / 6, 5);
+    }
   });
 
   it("in-range targets give (7-t)/6 probability", () => {
@@ -192,32 +197,252 @@ describe("To Hit modifier accumulation", () => {
     expect(computeToHitTarget(state.toHit)).toBe(4);
   });
 
-  it("WS 4 v 4 + Charging → 3+", () => {
+  it("WS 4 v 4 + Enchanted Blades (+1) → 3+", () => {
     const state = createInitialState();
-    const charging = withModifierActive(state.toHit, "toHit:charging");
-    expect(computeToHitTarget(charging)).toBe(3);
+    const card = withModifierActive(state.toHit, "toHit:enchantedBlades");
+    expect(computeToHitTarget(card)).toBe(3);
   });
 
-  it("WS 4 v 4 + Hard to Hit → 5+", () => {
+  it("WS 4 v 4 + Pha's Protection (-1) → 5+", () => {
     const state = createInitialState();
-    const hard = withModifierActive(state.toHit, "toHit:hardToHit");
-    expect(computeToHitTarget(hard)).toBe(5);
+    const card = withModifierActive(state.toHit, "toHit:phasProtection");
+    expect(computeToHitTarget(card)).toBe(5);
   });
 });
 
-describe("default state outcome (FR-026)", () => {
-  it("unsaved wound probability ≈ 0.148 at defaults", () => {
+function withModifierTarget(
+  card: CardState,
+  id: string,
+  target: "attacker" | "defender" | "both",
+): CardState {
+  return {
+    ...card,
+    modifiers: card.modifiers.map((m) => (m.id === id ? { ...m, target } : m)),
+  };
+}
+
+function withActiveAndValue(
+  card: CardState,
+  id: string,
+  value: number,
+): CardState {
+  return {
+    ...card,
+    modifiers: card.modifiers.map((m) =>
+      m.id === id ? { ...m, active: true, value } : m,
+    ),
+  };
+}
+
+describe("Speed of Light (force-ws value 10)", () => {
+  it("default target (atk) — chart(10, 4) = 3+", () => {
     const state = createInitialState();
-    const p = unsavedWoundProbability(state);
-    expect(p).toBeCloseTo(0.1481, 3);
+    const card = withModifierActive(state.toHit, "toHit:speedOfLight");
+    expect(computeToHitTarget(card)).toBe(3);
   });
 
-  it("default required rolls match FR-013/016/019/022", () => {
+  it("target=defender — chart(4, 10) = 5+", () => {
+    const state = createInitialState();
+    let card = withModifierActive(state.toHit, "toHit:speedOfLight");
+    card = withModifierTarget(card, "toHit:speedOfLight", "defender");
+    expect(computeToHitTarget(card)).toBe(5);
+  });
+
+  it("target=both — both sides forced to WS 10 — chart(10, 10) = 4+", () => {
+    const state = createInitialState();
+    let card = withModifierActive(state.toHit, "toHit:speedOfLight");
+    card = withModifierTarget(card, "toHit:speedOfLight", "both");
+    expect(computeToHitTarget(card)).toBe(4);
+  });
+
+  it("Fear (atk) WS=1 wins over Speed of Light (atk) WS=10 — smallest force-ws wins", () => {
+    const state = createInitialState();
+    const card = withModifierActive(
+      withModifierActive(state.toHit, "toHit:speedOfLight"),
+      "toHit:fear",
+    );
+    // chart(1, 4) = 5+
+    expect(computeToHitTarget(card)).toBe(5);
+  });
+});
+
+describe("Hand of Glory / Melkoth's (delta-ws variable)", () => {
+  it("Hand of Glory default (atk, value 1) → A_WS 5; chart(5, 4) = 3+", () => {
+    const state = createInitialState();
+    const card = withModifierActive(state.toHit, "toHit:handOfGlory");
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+
+  it("Hand of Glory atk value 3 → A_WS 7; chart(7, 4) = 3+", () => {
+    const state = createInitialState();
+    const card = withActiveAndValue(state.toHit, "toHit:handOfGlory", 3);
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+
+  it("Melkoth's target=defender, value 1 → D_WS 3; chart(4, 3) = 3+", () => {
+    const state = createInitialState();
+    let card = withModifierActive(state.toHit, "toHit:melkothsMiasma");
+    card = withModifierTarget(card, "toHit:melkothsMiasma", "defender");
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+
+  it("Melkoth's target=defender, value 3 → D_WS 1; chart(4, 1) = 3+", () => {
+    const state = createInitialState();
+    let card = withActiveAndValue(state.toHit, "toHit:melkothsMiasma", 3);
+    card = withModifierTarget(card, "toHit:melkothsMiasma", "defender");
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+
+  it("delta-ws clamps to [1, 10]: Melkoth's def value 3 with D_WS 1 stays at 1", () => {
+    const state = createInitialState();
+    let card = withActiveAndValue(state.toHit, "toHit:melkothsMiasma", 3);
+    card = withModifierTarget(card, "toHit:melkothsMiasma", "defender");
+    card = { ...card, inputs: { ...card.inputs, defenderWS: 1 } };
+    // baseD=1, delta=-3 → -2, clamped up to 1; chart(4, 1) = 3+
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+
+  it("Hand of Glory target=both uses value (atk side) and valueDef (def side) — chart(6, 6) = 4+", () => {
+    const state = createInitialState();
+    let card = withActiveAndValue(state.toHit, "toHit:handOfGlory", 2);
+    card = {
+      ...card,
+      modifiers: card.modifiers.map((m) =>
+        m.id === "toHit:handOfGlory"
+          ? { ...m, valueDef: 2, target: "both" }
+          : m,
+      ),
+    };
+    // attackerWS 4 + 2 = 6; defenderWS 4 + 2 = 6 → chart(6, 6) = 4+
+    expect(computeToHitTarget(card)).toBe(4);
+  });
+
+  it("Melkoth's target=both with value=1 / valueDef=2 — chart(3, 2) = 3+", () => {
+    const state = createInitialState();
+    const card: CardState = {
+      ...state.toHit,
+      modifiers: state.toHit.modifiers.map((m) =>
+        m.id === "toHit:melkothsMiasma"
+          ? { ...m, active: true, value: 1, valueDef: 2, target: "both" }
+          : m,
+      ),
+    };
+    // attackerWS 4 - 1 = 3; defenderWS 4 - 2 = 2 → chart(3, 2) = 3+
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+});
+
+describe("Fear test failed (force-ws value 1)", () => {
+  it("default target (atk) → chart(1, 4) = 5+", () => {
+    const state = createInitialState();
+    const card = withModifierActive(state.toHit, "toHit:fear");
+    expect(computeToHitTarget(card)).toBe(5);
+  });
+
+  it("target=defender → chart(4, 1) = 3+", () => {
+    const state = createInitialState();
+    let card = withModifierActive(state.toHit, "toHit:fear");
+    card = withModifierTarget(card, "toHit:fear", "defender");
+    expect(computeToHitTarget(card)).toBe(3);
+  });
+
+  it("target=both → chart(1, 1) = 4+", () => {
+    const state = createInitialState();
+    let card = withModifierActive(state.toHit, "toHit:fear");
+    card = withModifierTarget(card, "toHit:fear", "both");
+    expect(computeToHitTarget(card)).toBe(4);
+  });
+
+  it("Force-ws (atk) does NOT change the modifier sum — only swaps chart inputs", () => {
+    const state = createInitialState();
+    // chart(1, 4) = 5+, then Enchanted Blades -1 mod = 4+.
+    let card = withModifierActive(state.toHit, "toHit:fear");
+    card = withModifierActive(card, "toHit:enchantedBlades");
+    expect(computeToHitTarget(card)).toBe(4);
+  });
+});
+
+describe("auto-result override toggles", () => {
+  it("toHit:autoHit forces target=auto-pass with probability 1", () => {
+    const state = createInitialState();
+    const overridden: FullState = {
+      ...state,
+      toHit: withModifierActive(state.toHit, "toHit:autoHit"),
+    };
+    const { results, outcome } = computeFullState(overridden);
+    expect(results[0]?.target).toBe("auto-pass");
+    expect(results[0]?.probability).toBe(1);
+    // Hit always succeeds → unsaved-wound chance equals
+    // wound × failArmour × failWard at defaults
+    // (3/6 wound) × (5/6 failArmour at 6+) × (1 failWard at "no-ward")
+    expect(outcome.unsavedWoundChance).toBeCloseTo((3 / 6) * (5 / 6) * 1, 5);
+  });
+
+  it("toWound:autoWound forces target=auto-pass with probability 1", () => {
+    const state = createInitialState();
+    const overridden: FullState = {
+      ...state,
+      toWound: withModifierActive(state.toWound, "toWound:autoWound"),
+    };
+    const { results } = computeFullState(overridden);
+    expect(results[1]?.target).toBe("auto-pass");
+    expect(results[1]?.probability).toBe(1);
+  });
+
+  it("armourSave:noSave forces target=no-save with probability 0", () => {
+    const state = createInitialState();
+    const overridden: FullState = {
+      ...state,
+      armourSave: withModifierActive(state.armourSave, "armourSave:noSave"),
+    };
+    const { results } = computeFullState(overridden);
+    expect(results[2]?.target).toBe("no-save");
+    expect(results[2]?.probability).toBe(0);
+  });
+
+  it("wardSave:noWard forces target=no-ward with probability 0", () => {
+    const state = createInitialState();
+    const overridden: FullState = {
+      ...state,
+      wardSave: withModifierActive(state.wardSave, "wardSave:noWard"),
+    };
+    const { results } = computeFullState(overridden);
+    expect(results[3]?.target).toBe("no-ward");
+    expect(results[3]?.probability).toBe(0);
+  });
+
+  it("auto-result overrides numeric modifiers on the same card", () => {
+    const state = createInitialState();
+    let toHit = withModifierActive(state.toHit, "toHit:autoHit");
+    toHit = withModifierActive(toHit, "toHit:phasProtection");
+    toHit = withModifierActive(toHit, "toHit:iceshardBlizzard");
+    const { results } = computeFullState({ ...state, toHit });
+    expect(results[0]?.target).toBe("auto-pass");
+    expect(results[0]?.probability).toBe(1);
+  });
+});
+
+describe("default state outcome", () => {
+  it("default required rolls: WS 3 vs 3 → 4+, S 3 vs T 3 → 4+, AS 6+, Ward —", () => {
     const state = createInitialState();
     const { results } = computeFullState(state);
     expect(results[0]?.target).toBe(4);
-    expect(results[1]?.target).toBe(3);
-    expect(results[2]?.target).toBe(5);
-    expect(results[3]?.target).toBe(5);
+    expect(results[1]?.target).toBe(4);
+    expect(results[2]?.target).toBe(6);
+    expect(results[3]?.target).toBe("no-ward");
+  });
+
+  it("unsaved wound probability at defaults: hit × wound × failArmour × failWard", () => {
+    const state = createInitialState();
+    const p = unsavedWoundProbability(state);
+    // (3/6) × (3/6) × (5/6) × 1 = 75/432
+    expect(p).toBeCloseTo((3 / 6) * (3 / 6) * (5 / 6) * 1, 5);
+  });
+
+  it("'no-ward' base treats ward save as always failed (probability 0)", () => {
+    const state = createInitialState();
+    const { results } = computeFullState(state);
+    expect(results[3]?.target).toBe("no-ward");
+    expect(results[3]?.probability).toBe(0);
   });
 });

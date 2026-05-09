@@ -3,18 +3,26 @@ import {
   MODIFIER_CONFIGS,
   type CardState,
   type ComputedCardResult,
-  type DiceTarget,
   type ModifierId,
+  type SaveBaseTarget,
 } from "@/entities/dice";
+import { modifierSortKey } from "@/entities/dice/model/modifiers";
 import { ModifierToggleRow } from "@/shared/ui/modifier-toggle-row";
 import { ResultBadge } from "@/shared/ui/result-badge";
 import { SaveSelect } from "@/shared/ui/save-select";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
 
-const ARMOUR_MODIFIERS = MODIFIER_CONFIGS.filter(
-  (m) => m.card === "armourSave",
-);
+const ARMOUR_MODIFIERS = [
+  ...MODIFIER_CONFIGS.filter((m) => m.card === "armourSave"),
+].sort((a, b) => {
+  const aAuto = a.effect.kind === "auto-result";
+  const bAuto = b.effect.kind === "auto-result";
+  if (aAuto !== bAuto) return aAuto ? -1 : 1;
+  return (
+    modifierSortKey(a) - modifierSortKey(b) || a.label.localeCompare(b.label)
+  );
+});
 
 export function ArmourSaveCard({
   state,
@@ -24,10 +32,10 @@ export function ArmourSaveCard({
 }: {
   state: CardState;
   result: ComputedCardResult;
-  onSetSaveTarget: (value: DiceTarget) => void;
+  onSetSaveTarget: (value: SaveBaseTarget) => void;
   onToggleModifier: (id: ModifierId) => void;
 }) {
-  const baseTarget = (state.inputs.baseTarget ?? 4) as DiceTarget;
+  const baseTarget: SaveBaseTarget = state.inputs.baseTarget ?? 6;
   const activeMap = new Map(state.modifiers.map((m) => [m.id, m.active]));
 
   return (
@@ -52,6 +60,7 @@ export function ArmourSaveCard({
           onToggle={() => onToggleModifier(config.id)}
         />
       ))}
+      steps={result.steps}
       result={
         <ResultBadge
           target={result.target}

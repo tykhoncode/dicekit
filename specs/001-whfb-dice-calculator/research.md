@@ -100,10 +100,14 @@ hook keeps the AS card composable.
   in-range targets ≤ 6.
 - **A save can never be better than 1+**: `clampTarget(t, 'save')` returns
   `max(t, 1)` and stores it; display is "1+" with probability `5/6`.
+- **To Hit target ≥ 7**: clamps to "6+" with probability `1/6` (natural-6
+  always hits → To Hit is never unrollable, regardless of how far modifiers
+  push the chart result); combat-sequence summary shows "6+".
+- **To Wound target ≥ 7**: render "—" with "Auto-fail"; outcome treats as
+  `successProb = 0`. (WHFB 8th has no natural-6-always-wounds rule on the
+  source we encode against.)
 - **Save target ≥ 7**: render "—" with "No save" (Armour) or "No ward" (Ward);
   combat-sequence summary shows "—"; outcome treats as `failProb = 1`.
-- **To Hit / To Wound target ≥ 7**: render "—" with "Auto-fail"; outcome treats as
-  `successProb = 0`.
 
 **Rationale**: All confirmed in `/speckit-clarify` Q3 and FR-T05. Collected in
 helpers `clampTarget()` and `formatTarget()` in `entities/dice/lib/`.

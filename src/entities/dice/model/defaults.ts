@@ -2,19 +2,32 @@ import type { CardKind, FullState } from "@/entities/dice/model/types";
 import { MODIFIER_CONFIGS } from "@/entities/dice/model/modifiers";
 
 export const INITIAL_DEFAULTS = {
-  attackerWS: 4,
-  defenderWS: 4,
-  strength: 4,
+  attackerWS: 3,
+  defenderWS: 3,
+  strength: 3,
   toughness: 3,
-  armourBaseTarget: 4,
-  wardBaseTarget: 5,
+  armourBaseTarget: 6,
+  wardBaseTarget: "none",
 } as const;
 
 function modifiersFor(card: CardKind) {
-  return MODIFIER_CONFIGS.filter((c) => c.card === card).map((c) => ({
-    id: c.id,
-    active: false,
-  }));
+  return MODIFIER_CONFIGS.filter((c) => c.card === card).map((c) => {
+    const base: {
+      id: string;
+      active: false;
+      value?: number;
+      valueDef?: number;
+      target?: "attacker" | "defender" | "both";
+    } = { id: c.id, active: false };
+    if (c.variableValue) {
+      base.value = c.variableValue.default;
+      base.valueDef = c.variableValue.default;
+    }
+    if (c.effect.kind === "force-ws" || c.effect.kind === "delta-ws") {
+      base.target = c.effect.target;
+    }
+    return base;
+  });
 }
 
 export function createInitialState(): FullState {

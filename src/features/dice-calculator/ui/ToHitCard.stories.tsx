@@ -23,12 +23,22 @@ function Live({ activate = [] }: { activate?: ModifierId[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
-    <div className="dark w-72">
+    <div className="dark w-80">
       <ToHitCard
         state={calc.state.toHit}
         result={calc.results.toHit}
         onSetStat={(key, value) => calc.actions.setStat("toHit", key, value)}
         onToggleModifier={(id) => calc.actions.toggleModifier("toHit", id)}
+        onSetModifierValue={(id, value) =>
+          calc.actions.setModifierValue("toHit", id, value)
+        }
+        onSetModifierValueDef={(id, value) =>
+          calc.actions.setModifierValueDef("toHit", id, value)
+        }
+        onSetModifierTarget={(id, target) =>
+          calc.actions.setModifierTarget("toHit", id, target)
+        }
+        onTogglePinned={(id) => calc.actions.togglePinned("toHit", id)}
       />
     </div>
   );
@@ -38,18 +48,29 @@ export const Default: Story = {
   render: () => <Live />,
 };
 
-export const WithCharging: Story = {
-  render: () => <Live activate={["toHit:charging"]} />,
+export const WithEnchantedBlades: Story = {
+  render: () => <Live activate={["toHit:enchantedBlades"]} />,
 };
 
-export const EdgeCaseUnrollable: Story = {
+export const WithFear: Story = {
+  render: () => <Live activate={["toHit:fear"]} />,
+};
+
+export const WithSpeedOfLight: Story = {
+  render: () => <Live activate={["toHit:speedOfLight"]} />,
+};
+
+export const WithHandOfGlory: Story = {
+  render: () => <Live activate={["toHit:handOfGlory"]} />,
+};
+
+export const StackedDebuffs: Story = {
   render: () => (
     <Live
       activate={[
-        "toHit:hardToHit",
-        "toHit:longRange",
-        "toHit:multipleShots",
-        "toHit:cover",
+        "toHit:phasProtection",
+        "toHit:iceshardBlizzard",
+        "toHit:markOfNurgle",
       ]}
     />
   ),

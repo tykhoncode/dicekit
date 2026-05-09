@@ -24,12 +24,14 @@ test.describe("calculator page", () => {
     await expect(page.getByText("33.3% chance to save")).toHaveCount(2);
   });
 
-  test("toggling Charging changes the To Hit required roll", async ({
+  test("toggling a +1 modifier changes the To Hit required roll", async ({
     page,
   }) => {
     await page.goto("/");
     const before = await page.getByText("chance to hit").first().textContent();
-    await page.getByRole("switch", { name: /^Charging,/ }).click();
+    await page
+      .getByRole("switch", { name: /^Enchanted Blades of Aiban,/ })
+      .click();
     const after = await page.getByText("chance to hit").first().textContent();
     expect(after).not.toBe(before);
   });
@@ -51,15 +53,19 @@ test.describe("calculator page", () => {
     const before = await page
       .getByText(/Chance of unsaved wound/)
       .textContent();
-    await page.getByRole("switch", { name: /^Charging,/ }).click();
+    await page
+      .getByRole("switch", { name: /^Enchanted Blades of Aiban,/ })
+      .click();
     const after = await page.getByText(/Chance of unsaved wound/).textContent();
     expect(after).not.toBe(before);
   });
 
   test("Reset All restores defaults after a state change", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("switch", { name: /^Charging,/ }).click();
-    await page.getByRole("switch", { name: /^Higher Ground,/ }).click();
+    await page
+      .getByRole("switch", { name: /^Enchanted Blades of Aiban,/ })
+      .click();
+    await page.getByRole("switch", { name: /^Sword of Striking,/ }).click();
     await expect(page.getByText("50.0% chance to hit")).toHaveCount(0);
 
     await page.getByRole("button", { name: "Reset All" }).click();

@@ -20,6 +20,9 @@ export function formatProbability(
   if (target === "auto-fail") return "Auto-fail";
   if (target === "no-save") return "No save";
   if (target === "no-ward") return "No ward";
+  if (target === "auto-pass") {
+    return kind === "toHit" ? "Hits automatically" : "Wounds automatically";
+  }
   const percent = (probability * 100).toFixed(1);
   switch (kind) {
     case "toHit":

@@ -49,7 +49,7 @@ export const Default: Story = {
 export const AfterModifiers: Story = {
   render: () => (
     <Live
-      toHit={["toHit:charging"]}
+      toHit={["toHit:enchantedBlades"]}
       toWound={["toWound:greatWeapon"]}
       armourSave={["armourSave:armourPiercing"]}
     />

@@ -150,9 +150,11 @@ clickable but do not change page state.
 
 - **Modifiers push the required roll outside the d6 range**: handled per WHFB
   rules and FR-T05. A target ≤ 1 displays as "1+" (a natural 1 still fails); a
-  save target ≥ 7 displays as "—" with "No save" / "No ward"; a To Hit or To
-  Wound target ≥ 7 displays as "—" with "Auto-fail". Probabilities are bounded
-  to `[1/6, 5/6]` for in-range targets by the natural-1 / natural-6 rules.
+  To Hit target ≥ 7 clamps to "6+" (a natural 6 always hits, so To Hit is
+  never unrollable); a To Wound target ≥ 7 displays as "—" with "Auto-fail";
+  a save target ≥ 7 displays as "—" with "No save" / "No ward". Probabilities
+  are bounded to `[1/6, 5/6]` for in-range targets by the natural-1 /
+  natural-6 rules.
 - **Stat inputs at extremes**: numeric steppers refuse to go below 1 (WS, S, T)
   and not exceed 10 — matching the rows / columns of the WHFB To Hit and To
   Wound charts. Steppers also refuse values outside this range during keyboard
@@ -211,9 +213,11 @@ clickable but do not change page state.
 - **FR-011**: The To Hit card MUST expose two stat steppers labelled "Attacker WS"
   and "Defender WS", each defaulting to 4 (chosen so the default required roll lands
   at 4+ per the WHFB To Hit chart for equal Weapon Skill).
-- **FR-012**: The To Hit card MUST list the following modifiers, each with the shown
-  numeric effect: Fear (failed test) -1, Higher Ground +1, Charging +1, Enemy Hard
-  to Hit -1, Spell / Hex (to hit) -1, Cover / Shooting Modifier -1, Multiple Shots
+- **FR-012**: The To Hit card MUST list rows in this order: "Hits Automatically"
+  (auto-result, see FR-T06) FIRST, then the two Fear toggles "Fear test failed
+  (Defender)" and "Fear test failed (Attacker)" (force-ws, see FR-T07), then
+  the numeric modifiers Higher Ground +1, Charging +1, Enemy Hard to Hit -1,
+  Spell / Hex (to hit) -1, Cover / Shooting Modifier -1, Multiple Shots
   Penalty -1, Long Range Penalty -1, Stand & Shoot Reaction -1.
 - **FR-013**: The To Hit card's default result panel MUST read "4+" with "50.0%
   chance to hit". The required roll is derived live from the WHFB 8th Edition To Hit
@@ -229,10 +233,11 @@ clickable but do not change page state.
   required roll on the WHFB To Wound chart (S one higher than T) and a -1 Armour
   Save Strength penalty per FR-018a, which together produce the documented default
   values in FR-016 and FR-019.
-- **FR-015**: The To Wound card MUST list the following modifiers: Great Weapon
-  (+2 Strength) +2, Halberd (+1 Strength) +1, Lance (on charge) +2, Strength Buff
-  +1, Strength Debuff -1, Wyssan's / Blessing (+1 Strength) +1, Curse / Hex
-  (-1 Strength) -1.
+- **FR-015**: The To Wound card MUST list the override toggle "Wounds
+  Automatically" (auto-result, see FR-T06) FIRST, followed by these numeric
+  modifiers: Great Weapon (+2 Strength) +2, Halberd (+1 Strength) +1, Lance
+  (on charge) +2, Strength Buff +1, Strength Debuff -1, Wyssan's / Blessing
+  (+1 Strength) +1, Curse / Hex (-1 Strength) -1.
 - **FR-016**: The To Wound card's default result panel MUST read "3+" with "66.7%
   chance to wound". The required roll is derived live from the WHFB 8th Edition To
   Wound chart (lookup of effective Strength × Toughness) plus the sum of any active
@@ -243,14 +248,15 @@ clickable but do not change page state.
 
 - **FR-017**: The Armour Save card MUST expose a single input control allowing the
   player to choose the base armour save target (defaulting to 4+).
-- **FR-018**: The Armour Save card MUST list the following modifiers as user
-  toggles: Shield Bonus +1, Mounted Bonus +1, Armour Piercing -1, Cover Bonus
-  (shooting) +1. The previously-listed Strength-tier rows (S4 / S5 / S6) are
-  removed — that penalty is now derived automatically from the Strength stat on
-  the To Wound card per FR-018a. Parry Ward (6++) is NOT duplicated here; it
-  belongs to the Ward Save card only (FR-021), since per WHFB 8th Edition rules
-  Parry from hand-weapon-and-shield is a 6+ ward save (a parallel save layer),
-  not an armour-save modifier.
+- **FR-018**: The Armour Save card MUST list the override toggle "No Armour
+  Save Allowed" (auto-result, see FR-T06) FIRST, followed by these numeric
+  modifiers: Shield Bonus +1, Mounted Bonus +1, Armour Piercing -1, Cover
+  Bonus (shooting) +1. The previously-listed Strength-tier rows (S4 / S5 /
+  S6) are removed — that penalty is now derived automatically from the
+  Strength stat on the To Wound card per FR-018a. Parry Ward (6++) is NOT
+  duplicated here; it belongs to the Ward Save card only (FR-021), since per
+  WHFB 8th Edition rules Parry from hand-weapon-and-shield is a 6+ ward save
+  (a parallel save layer), not an armour-save modifier.
 - **FR-018a**: The Armour Save required roll MUST be reduced (made worse) by an
   amount derived live from the To Wound card's _effective_ Strength (base
   Strength stat plus the sum of any active Strength-source modifiers from
@@ -271,8 +277,9 @@ clickable but do not change page state.
 
 - **FR-020**: The Ward Save card MUST expose a single input control allowing the
   player to choose the base ward save target (defaulting to 5+).
-- **FR-021**: The Ward Save card MUST list the following modifiers: Magic Resistance
-  (+ward vs spells) +1, Parry Ward (6++) 6++, Improved Ward +1.
+- **FR-021**: The Ward Save card MUST list the override toggle "No Saves Allowed"
+  (auto-result, see FR-T06) FIRST, followed by Magic Resistance (+ward vs
+  spells) +1, Parry Ward (6++) 6++, Improved Ward +1.
 - **FR-022**: The Ward Save card's default result panel MUST read "5+" with "33.3%
   chance to save".
 
@@ -356,15 +363,60 @@ Strength = Strength + sum(active Strength-source modifiers)`; they MUST NOT
   apply here. The "Magic Resistance" and "Improved Ward" toggles in FR-021 are
   the only sources that adjust the ward target in v1; the user is responsible for
   toggling them correctly. A natural 1 always fails.
-- **FR-T05 (Boundary display)**: When a required roll is computed as ≤ 1, the
-  result panel MUST display the dice target as "1+" (the system clamps; a natural
-  1 still fails). When a required roll is computed as ≥ 7 for a save, the result
-  panel MUST display the literal em dash "—" as the dice target and the
-  probability text MUST read "No save" (Armour Save) or "No ward" (Ward Save);
-  the Combat Sequence summary MUST render the same em dash for that step. When
-  the target is ≥ 7 for To Hit or To Wound, the result panel MUST display "—"
-  with "Auto-fail" as the probability text. Probability values must always remain
-  in `[1/6, 5/6]` for in-range targets due to the natural-1 / natural-6 rules.
+- **FR-T05 (Boundary display)**: Boundary handling differs by card kind because
+  WHFB natural-roll rules are not symmetric:
+  - **All cards, target ≤ 1**: result panel displays "1+" (the system clamps;
+    a natural 1 still fails per the rule on each card), probability `5/6`.
+  - **To Hit, target ≥ 7**: clamps to "6+" with probability `1/6` — a natural
+    6 always hits in close combat, so To Hit is NEVER unrollable, regardless
+    of how far modifiers push the chart result. The Combat Sequence summary
+    renders "6+" for that step.
+  - **To Wound, target ≥ 7**: result panel displays "—" with "Auto-fail" as
+    the probability text; probability `0`. (WHFB 8th does not specify a
+    natural-6 always-wounds rule on the source we encode against, so the
+    chart truly is auto-fail past 6+.)
+  - **Armour Save, target ≥ 7**: result panel displays "—" with "No save",
+    probability `0`. The Combat Sequence summary renders "—" for that step;
+    Estimated Outcome treats the step as 100% fail.
+  - **Ward Save, target ≥ 7**: same as Armour Save with "No ward" copy.
+    Probability values must always remain in `[1/6, 5/6]` for in-range targets
+    due to the natural-1 / natural-6 rules.
+- **FR-T06 (Auto-result overrides)**: Each card carries one absolute-override
+  toggle, ALWAYS pinned as the FIRST row of that card's modifier list. When
+  active, the toggle bypasses the normal compute pipeline entirely:
+  - **To Hit → "Hits Automatically"**: when active, the To Hit card displays
+    "—" with "Hits automatically" copy and the To Hit step contributes a
+    success probability of `1.0` to the Estimated Outcome.
+  - **To Wound → "Wounds Automatically"**: same shape as To Hit; copy is
+    "Wounds automatically", probability `1.0`.
+  - **Armour Save → "No Armour Save Allowed"**: when active, the Armour Save
+    card displays "—" with "No save" copy and the step contributes a save
+    probability of `0` (i.e., 100% fail) to the Estimated Outcome. Same end
+    state as the boundary "save target ≥ 7" case in FR-T05, but reached by
+    explicit toggle rather than by modifier accumulation.
+  - **Ward Save → "No Saves Allowed"**: same shape; result-panel copy is
+    "No ward" (the toggle label is "No Saves Allowed" by user direction —
+    it deliberately doesn't repeat "Ward Save" since the card title already
+    provides that context).
+    Override toggles take precedence over every other modifier on the same
+    card — when active, numeric modifiers, replace-ward, the Strength-derived
+    AS penalty, and the chart lookup are all ignored. The result is computed
+    directly from the override.
+- **FR-T07 (Failed Fear Test)**: The To Hit card carries two `force-ws`
+  toggles encoding the WHFB 8th Edition Fear rule, "a model that has failed
+  a Fear test fights at Weapon Skill 1":
+  - **"Fear test failed (Defender)"**: when active, the chart lookup uses
+    the user-entered Attacker WS against a forced Defender WS of `1`. The
+    user-entered Defender WS in the stat input is NOT mutated; only the
+    chart lookup substitutes 1.
+  - **"Fear test failed (Attacker)"**: same in the other direction — chart
+    lookup uses `1` for Attacker WS against the user-entered Defender WS.
+  - Both active → chart lookup uses `(1, 1)` → equal-WS → 4+.
+    These toggles do NOT contribute to the numeric modifier sum (they swap
+    inputs to the chart, they don't shift the chart's output). Numeric To Hit
+    modifiers (Charging, Higher Ground, etc.) still apply on top of the
+    Fear-substituted chart lookup. The "Hits Automatically" override (FR-T06)
+    beats both Fear toggles if all three are active simultaneously.
 
 **Visual identity**:
 

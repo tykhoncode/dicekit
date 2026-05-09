@@ -23,6 +23,16 @@ export function CalculatorPage() {
           result={results.toHit}
           onSetStat={(key, value) => actions.setStat("toHit", key, value)}
           onToggleModifier={(id) => actions.toggleModifier("toHit", id)}
+          onSetModifierValue={(id, value) =>
+            actions.setModifierValue("toHit", id, value)
+          }
+          onSetModifierValueDef={(id, value) =>
+            actions.setModifierValueDef("toHit", id, value)
+          }
+          onSetModifierTarget={(id, target) =>
+            actions.setModifierTarget("toHit", id, target)
+          }
+          onTogglePinned={(id) => actions.togglePinned("toHit", id)}
         />
         <ToWoundCard
           state={state.toWound}

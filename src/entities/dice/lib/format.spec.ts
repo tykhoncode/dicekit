@@ -10,6 +10,7 @@ describe("formatTarget", () => {
 
   it("renders unrollable markers as the em-dash glyph", () => {
     expect(formatTarget("auto-fail")).toBe("—");
+    expect(formatTarget("auto-pass")).toBe("—");
     expect(formatTarget("no-save")).toBe("—");
     expect(formatTarget("no-ward")).toBe("—");
   });
@@ -30,10 +31,15 @@ describe("formatProbability", () => {
   });
 
   it("returns boundary copy when target is unrollable", () => {
-    expect(formatProbability(0, "toHit", "auto-fail")).toBe("Auto-fail");
     expect(formatProbability(0, "toWound", "auto-fail")).toBe("Auto-fail");
     expect(formatProbability(0, "armourSave", "no-save")).toBe("No save");
     expect(formatProbability(0, "wardSave", "no-ward")).toBe("No ward");
+    expect(formatProbability(1, "toHit", "auto-pass")).toBe(
+      "Hits automatically",
+    );
+    expect(formatProbability(1, "toWound", "auto-pass")).toBe(
+      "Wounds automatically",
+    );
   });
 });
 

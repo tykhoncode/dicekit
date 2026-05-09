@@ -5,13 +5,23 @@ import {
   type ComputedCardResult,
   type ModifierId,
 } from "@/entities/dice";
+import { modifierSortKey } from "@/entities/dice/model/modifiers";
 import { ModifierToggleRow } from "@/shared/ui/modifier-toggle-row";
 import { NumberStepper } from "@/shared/ui/number-stepper";
 import { ResultBadge } from "@/shared/ui/result-badge";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
 
-const TO_WOUND_MODIFIERS = MODIFIER_CONFIGS.filter((m) => m.card === "toWound");
+const TO_WOUND_MODIFIERS = [
+  ...MODIFIER_CONFIGS.filter((m) => m.card === "toWound"),
+].sort((a, b) => {
+  const aAuto = a.effect.kind === "auto-result";
+  const bAuto = b.effect.kind === "auto-result";
+  if (aAuto !== bAuto) return aAuto ? -1 : 1;
+  return (
+    modifierSortKey(a) - modifierSortKey(b) || a.label.localeCompare(b.label)
+  );
+});
 
 export function ToWoundCard({
   state,
@@ -26,7 +36,9 @@ export function ToWoundCard({
 }) {
   const strength = state.inputs.strength ?? 4;
   const toughness = state.inputs.toughness ?? 3;
-  const activeMap = new Map(state.modifiers.map((m) => [m.id, m.active]));
+  const activeMap = new Map(
+    state.modifiers.map((m) => [m.id, m.active] as const),
+  );
 
   return (
     <CalculatorCard
@@ -57,6 +69,7 @@ export function ToWoundCard({
           onToggle={() => onToggleModifier(config.id)}
         />
       ))}
+      steps={result.steps}
       result={
         <ResultBadge
           target={result.target}

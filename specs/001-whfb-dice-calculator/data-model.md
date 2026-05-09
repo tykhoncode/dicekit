@@ -45,8 +45,10 @@ reachable since natural 1 always fails).
 
 ```text
 type ModifierEffect =
-  | { kind: 'numeric'; value: number }   // ±1, ±2, etc.
-  | { kind: 'replace-ward'; value: 6 };  // Parry Ward (6++)
+  | { kind: 'numeric'; value: number }                            // ±1, ±2, etc.
+  | { kind: 'replace-ward'; value: 6 }                            // Parry Ward (6++)
+  | { kind: 'auto-result'; value: 'pass' | 'fail' }               // FR-T06 overrides
+  | { kind: 'force-ws'; target: 'attacker' | 'defender' };        // FR-T07 Failed Fear Test → WS=1
 
 type ModifierId = string;                // stable id for state keying
 
@@ -185,12 +187,12 @@ by `clampAndFormat` per FR-T05.
 
 A flat `readonly ModifierConfig[]` covering all four cards. The shape per card:
 
-| Card       | Count | Examples                                                                                                                                                                                        |
-| ---------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| toHit      | 9     | `{ id:'toHit:charging', label:'Charging', effect:{kind:'numeric',value:1} }`, plus Fear, Higher Ground, Enemy Hard to Hit, Spell/Hex, Cover/Shooting, Multiple Shots, Long Range, Stand & Shoot |
-| toWound    | 7     | Great Weapon (+2), Halberd (+1), Lance (+2), Strength Buff (+1), Strength Debuff (-1), Wyssan's/Blessing (+1), Curse/Hex (-1)                                                                   |
-| armourSave | 4     | Shield Bonus (+1), Mounted Bonus (+1), Armour Piercing (-1), Cover Bonus (+1)                                                                                                                   |
-| wardSave   | 3     | Magic Resistance (+1), Parry Ward (6++ — replace-ward), Improved Ward (+1)                                                                                                                      |
+| Card       | Count | Examples                                                                                                                                                                                                                                            |
+| ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| toHit      | 11    | "Hits Automatically" (auto-result pass) FIRST, then "Fear test failed (Defender)" + "Fear test failed (Attacker)" (force-ws), then Higher Ground, Charging, Enemy Hard to Hit, Spell/Hex, Cover/Shooting, Multiple Shots, Long Range, Stand & Shoot |
+| toWound    | 8     | "Wounds Automatically" (auto-result pass) FIRST, then Great Weapon (+2), Halberd (+1), Lance (+2), Strength Buff (+1), Strength Debuff (-1), Wyssan's/Blessing (+1), Curse/Hex (-1)                                                                 |
+| armourSave | 5     | "No Armour Save Allowed" (auto-result fail) FIRST, then Shield Bonus (+1), Mounted Bonus (+1), Armour Piercing (-1), Cover Bonus (+1)                                                                                                               |
+| wardSave   | 4     | "No Saves Allowed" (auto-result fail) FIRST, then Magic Resistance (+1), Parry Ward (6++ — replace-ward), Improved Ward (+1)                                                                                                                        |
 
 All Strength-source modifiers (Great Weapon, Halberd, Lance, Strength Buff, Strength
 Debuff, Wyssan's, Curse/Hex) are flagged via a derived selector
