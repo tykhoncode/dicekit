@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Loader2 } from "lucide-react";
-import { HomePage } from "@/pages/home";
+import { CalculatorPage } from "@/pages/calculator";
 import { NotFoundPage } from "@/pages/not-found";
 
 function RouteFallback() {
@@ -21,7 +21,7 @@ export function AppRouter() {
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<CalculatorPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>

@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
 
 test.describe("smoke", () => {
-  test("home page renders welcome", async ({ page }) => {
+  test("root renders the DiceKit calculator", async ({ page }) => {
     await page.goto("/");
+    await expect(page.getByText("DiceKit", { exact: true })).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Welcome", level: 1 }),
+      page.getByText("WHFB 8th Edition Dice Calculator"),
     ).toBeVisible();
   });
 
@@ -15,9 +16,7 @@ test.describe("smoke", () => {
     ).toBeVisible();
 
     await page.getByRole("link", { name: "Go home" }).click();
-    await expect(
-      page.getByRole("heading", { name: "Welcome", level: 1 }),
-    ).toBeVisible();
+    await expect(page.getByText("DiceKit", { exact: true })).toBeVisible();
   });
 
   test("no console errors on initial load", async ({ page }) => {
@@ -28,9 +27,7 @@ test.describe("smoke", () => {
     });
 
     await page.goto("/");
-    await expect(
-      page.getByRole("heading", { name: "Welcome", level: 1 }),
-    ).toBeVisible();
+    await expect(page.getByText("DiceKit", { exact: true })).toBeVisible();
 
     expect(errors).toEqual([]);
   });

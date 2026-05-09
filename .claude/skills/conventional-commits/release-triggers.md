@@ -18,13 +18,13 @@ Releases follow semantic versioning: `MAJOR.MINOR.PATCH`
 
 ### ✅ Triggers Release
 
-| Commit Type | Version Bump | Example | New Version |
-|-------------|--------------|---------|-------------|
-| `feat:` | MINOR | 1.2.0 → 1.3.0 | 1.3.0 |
-| `fix:` | PATCH | 1.2.0 → 1.2.1 | 1.2.1 |
-| `deps:` | PATCH | 1.2.0 → 1.2.1 | 1.2.1 |
-| `<any>!` | MAJOR | 1.2.0 → 2.0.0 | 2.0.0 |
-| `BREAKING CHANGE:` | MAJOR | 1.2.0 → 2.0.0 | 2.0.0 |
+| Commit Type        | Version Bump | Example       | New Version |
+| ------------------ | ------------ | ------------- | ----------- |
+| `feat:`            | MINOR        | 1.2.0 → 1.3.0 | 1.3.0       |
+| `fix:`             | PATCH        | 1.2.0 → 1.2.1 | 1.2.1       |
+| `deps:`            | PATCH        | 1.2.0 → 1.2.1 | 1.2.1       |
+| `<any>!`           | MAJOR        | 1.2.0 → 2.0.0 | 2.0.0       |
+| `BREAKING CHANGE:` | MAJOR        | 1.2.0 → 2.0.0 | 2.0.0       |
 
 ### ❌ Does NOT Trigger Release
 
@@ -68,6 +68,7 @@ Is it a bug fix or dependency update? (fix: or deps:)
 ### Want to Trigger a Release?
 
 Use one of these types:
+
 - `feat:` - For new features
 - `fix:` - For bug fixes
 - `fix: refactor ...` - For refactoring that should trigger a release
@@ -75,6 +76,7 @@ Use one of these types:
 ### Don't Want to Trigger a Release?
 
 Use one of these types:
+
 - `docs:` - Documentation updates
 - `refactor:` - Code improvements
 - `test:` - Test changes
@@ -86,11 +88,13 @@ Use one of these types:
 **Problem:** Refactoring improves code quality but doesn't trigger releases with `refactor:` type.
 
 **Solution:** If the refactoring is significant and should be released:
+
 ```
 fix: refactor authentication logic for better maintainability
 ```
 
 This is acceptable because:
+
 - Refactoring often fixes technical debt
 - Improves code quality and maintainability
 - Makes the codebase more reliable
@@ -101,6 +105,7 @@ This is acceptable because:
 release-please analyzes ALL commits in the PR. The highest-priority type determines the version bump:
 
 **Example PR with multiple commits:**
+
 ```
 docs: update readme
 test: add unit tests
@@ -117,6 +122,7 @@ fix: resolve button styling
 Breaking changes ALWAYS trigger a MAJOR release, regardless of the commit type:
 
 ### Method 1: Add `!` after type
+
 ```
 feat!: change api response format
 
@@ -125,6 +131,7 @@ Users need to update their API clients.
 ```
 
 ### Method 2: Add `BREAKING CHANGE:` footer
+
 ```
 refactor: restructure database schema
 
@@ -135,6 +142,7 @@ Migration script required: npm run migrate:v2
 ### When to Use Breaking Changes
 
 Only use breaking changes when:
+
 - Removing public APIs or endpoints
 - Changing function signatures
 - Modifying data formats
@@ -148,6 +156,7 @@ Only use breaking changes when:
 You're adding a new dashboard widget.
 
 **Commit:**
+
 ```
 feat: add analytics dashboard widget
 ```
@@ -161,6 +170,7 @@ feat: add analytics dashboard widget
 You're fixing a broken form validation.
 
 **Commit:**
+
 ```
 fix: correct email validation regex
 ```
@@ -174,6 +184,7 @@ fix: correct email validation regex
 You're updating the README.
 
 **Commit:**
+
 ```
 docs: add deployment instructions
 ```
@@ -187,6 +198,7 @@ docs: add deployment instructions
 You're refactoring authentication code and want it released.
 
 **Commit:**
+
 ```
 fix: refactor authentication flow for improved security
 ```
@@ -200,6 +212,7 @@ fix: refactor authentication flow for improved security
 You're renaming variables for clarity.
 
 **Commit:**
+
 ```
 refactor: rename user variables for consistency
 ```
@@ -213,6 +226,7 @@ refactor: rename user variables for consistency
 You're changing the API response format.
 
 **Commit:**
+
 ```
 feat!: restructure api response format
 
@@ -227,6 +241,7 @@ format instead of direct data. Update client code accordingly.
 **Q: I made a refactor. Should I use `fix:` or `refactor:`?**
 
 A: Depends on whether you want a release:
+
 - Want release → `fix: refactor ...`
 - Don't need immediate release → `refactor: ...`
 
@@ -237,6 +252,7 @@ A: No. One commit should have one type. If you have multiple unrelated changes, 
 **Q: What if I accidentally use the wrong type?**
 
 A: Before pushing:
+
 - Use `git commit --amend` to fix the message
 - After pushing to PR: Add a new commit with the correct type (release-please will use the highest priority)
 

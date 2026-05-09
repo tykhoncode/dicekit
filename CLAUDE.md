@@ -2,6 +2,14 @@
 
 Guidance for Claude Code working in this repository.
 
+## Git policy (NON-NEGOTIABLE)
+
+- **Never run `git commit`, `git push`, `git merge`, `git rebase`, `git tag`, `git reset --hard`, or any other history-mutating / remote-publishing git command.** No matter how clearly the work seems to be at a "natural commit point", the agent does not commit. This applies even when the user has previously authorized a commit — authorization is single-use, not standing.
+- **Never bypass the rule via the `commit-commands:*` skills, the `speckit-git-commit` hook, gh CLI (`gh pr create`, `gh pr merge`), or any wrapper that ultimately produces a commit / push.** If a slash-command pre/post hook offers an automatic commit (e.g. `after_constitution`, `after_implement`), display the suggested message and tell the user how to run it themselves — do not invoke it.
+- **Read-only git is fine**: `git status`, `git diff`, `git log`, `git show`, `git branch --list`, `git stash list` etc. are encouraged for context.
+- **Staging is fine** (`git add`, `git restore --staged`) when the user wants help organizing a commit they will create themselves.
+- **Output a suggested commit message instead.** When the work reaches a point that the user might want to commit, surface the suggestion in the chat (conventional-commits + gitmoji style if the project uses it — see `git log` for the established pattern). The user runs `git commit` themselves.
+
 ## Commands
 
 - Standard `npm run` scripts (`dev`, `build`, `typecheck`, `lint`, `format`, `storybook`, …) are in `package.json`;
@@ -65,7 +73,20 @@ Build-time flags (DEV/PROD/MODE) → import.meta.env.X directly for DCE; never i
 
 <!-- SPECKIT START -->
 
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+Active feature: **001-whfb-dice-calculator** (WHFB 8th Edition Dice Calculator UI).
+
+Read the current plan and supporting artifacts before changing related code:
+
+- Plan: `specs/001-whfb-dice-calculator/plan.md`
+- Spec: `specs/001-whfb-dice-calculator/spec.md`
+- Research: `specs/001-whfb-dice-calculator/research.md`
+- Data model: `specs/001-whfb-dice-calculator/data-model.md`
+- Quickstart: `specs/001-whfb-dice-calculator/quickstart.md`
+- Backlog of layout-overflowing rules: `specs/001-whfb-dice-calculator/future-rules-backlog.md`
+
+The plan freezes the four-card layout (FR-037) and routes any WHFB rule that
+doesn't fit through the backlog (FR-038). v1 ships the real WHFB 8th Edition
+dice math for the four core steps; broader rules-engine work (army books, magic
+items, special abilities) stays deferred.
 
 <!-- SPECKIT END -->
