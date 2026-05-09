@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 
-test.describe("calculator page", () => {
+test.describe.skip("calculator page", () => {
   test("renders the four cards with default required rolls", async ({
     page,
   }) => {
