@@ -52,7 +52,10 @@ export function SummaryPanel({
         </span>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {ordered.map((result, index) => {
-            const isImpossible = result.target === "impossible";
+            const isImpossible =
+              result.target === "impossible" ||
+              result.target === "no-save" ||
+              result.target === "no-ward";
             const isCascade = result.kind === "toHit" && result.cascade != null;
             const targetDisplay = isImpossible
               ? "✕"

@@ -34,6 +34,8 @@ function Live({
       <ArmourSaveCard
         state={calc.state.armourSave}
         attackMode={calc.state.attackMode}
+        baseStrength={calc.state.toWound.inputs.strength ?? 3}
+        effectiveStrength={calc.state.toWound.inputs.strength ?? 3}
         result={calc.results.armourSave}
         onSetSaveTarget={(v) => calc.actions.setSaveTarget("armourSave", v)}
         onToggleModifier={(id) => calc.actions.toggleModifier("armourSave", id)}

@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import { Flame } from "lucide-react";
 import {
   MODIFIER_CONFIGS,
@@ -8,6 +8,12 @@ import {
   type ModifierConfig,
   type ModifierId,
 } from "@/entities/dice";
+import { lookupToWound } from "@/entities/dice/lib/charts";
+import {
+  activeNumericModifierSum,
+  getEffectiveStrength,
+  getEffectiveToughness,
+} from "@/entities/dice/lib/compute";
 import { modifierSortKey } from "@/entities/dice/model/modifiers";
 import { ModifierGroup } from "@/shared/ui/modifier-group";
 import {
@@ -19,6 +25,8 @@ import { Separator } from "@/shared/ui/separator";
 import { ResultBadge } from "@/shared/ui/result-badge";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
+import { StatChartPanel } from "./StatChartPanel";
+import { StatChartToggleButton } from "./StatChartToggleButton";
 
 function sorted(configs: readonly ModifierConfig[]): ModifierConfig[] {
   return [...configs].sort(
@@ -53,6 +61,7 @@ export function ToWoundCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const [chartOpen, setChartOpen] = useState(false);
   const activeModifiers =
     attackMode === "melee" ? state.modifiers : state.modifiersShooting;
   const TO_WOUND_CONFIGS = useMemo(
@@ -293,6 +302,27 @@ export function ToWoundCard({
       title="To Wound"
       subtitle="S vs T"
       infoText="Lookup the WHFB 8th Edition To Wound chart using effective Strength and Toughness, then apply active modifiers."
+      headerActions={
+        <StatChartToggleButton
+          pressed={chartOpen}
+          onPressedChange={setChartOpen}
+        />
+      }
+      chartPanel={
+        chartOpen ? (
+          <StatChartPanel
+            rowLabel="Attacker S"
+            colLabel="Defender T"
+            lookup={lookupToWound}
+            baseRow={state.inputs.strength ?? 3}
+            baseCol={state.inputs.toughness ?? 3}
+            effectiveRow={getEffectiveStrength(state, attackMode)}
+            effectiveCol={getEffectiveToughness(state, attackMode)}
+            directModSum={activeNumericModifierSum(activeModifiers)}
+            finalTarget={result.target}
+          />
+        ) : undefined
+      }
       inputs={
         <>
           <NumberStepper

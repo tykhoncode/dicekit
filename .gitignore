@@ -43,3 +43,4 @@ storybook-static
 
 # Agent scratch space (per CLAUDE.md convention)
 .artifacts/
+docs/*

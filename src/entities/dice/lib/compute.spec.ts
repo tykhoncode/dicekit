@@ -7,6 +7,8 @@ import {
   computeToHitTarget,
   computeToWoundTarget,
   computeWardSaveTarget,
+  getEffectiveAttackerWS,
+  getEffectiveDefenderWS,
   getEffectiveStrength,
   unsavedWoundProbability,
 } from "./compute";
@@ -673,5 +675,55 @@ describe("attack mode toggle — shooting cascade & impossible", () => {
     expect(results[0]?.target).toBe(6);
     expect(results[0]?.probability).toBeCloseTo(1 / 6, 5);
     expect(results[0]?.cascade).toBeUndefined();
+  });
+});
+
+describe("effective WS helpers", () => {
+  it("getEffectiveAttackerWS returns base when no WS modifiers are active", () => {
+    const state = createInitialState();
+    state.toHit.inputs.attackerWS = 4;
+    expect(getEffectiveAttackerWS(state.toHit)).toBe(4);
+  });
+
+  it("getEffectiveDefenderWS returns base when no WS modifiers are active", () => {
+    const state = createInitialState();
+    state.toHit.inputs.defenderWS = 5;
+    expect(getEffectiveDefenderWS(state.toHit)).toBe(5);
+  });
+
+  it("getEffectiveAttackerWS includes delta-ws modifiers (Hand of Glory)", () => {
+    const state = createInitialState();
+    state.toHit.inputs.attackerWS = 3;
+    state.toHit.modifiers = state.toHit.modifiers.map((m) =>
+      m.id === "toHit:handOfGlory"
+        ? { ...m, active: true, value: 2, target: "attacker" }
+        : m,
+    );
+    expect(getEffectiveAttackerWS(state.toHit)).toBe(5);
+  });
+
+  it("getEffectiveDefenderWS includes Fear (force-ws → 1) on defender", () => {
+    const state = createInitialState();
+    state.toHit.inputs.defenderWS = 6;
+    state.toHit.modifiers = state.toHit.modifiers.map((m) =>
+      m.id === "toHit:fear" ? { ...m, active: true, target: "defender" } : m,
+    );
+    expect(getEffectiveDefenderWS(state.toHit)).toBe(1);
+  });
+
+  it("matches the value that explainToHitMelee computes internally (regression pin)", () => {
+    const state = createInitialState();
+    state.toHit.inputs.attackerWS = 3;
+    state.toHit.inputs.defenderWS = 3;
+    state.toHit.modifiers = state.toHit.modifiers.map((m) => {
+      if (m.id === "toHit:handOfGlory")
+        return { ...m, active: true, value: 2, target: "attacker" };
+      if (m.id === "toHit:swordOfStriking") return { ...m, active: true };
+      return m;
+    });
+    expect(getEffectiveAttackerWS(state.toHit)).toBe(5);
+    expect(getEffectiveDefenderWS(state.toHit)).toBe(3);
+    const { results } = computeFullState(state);
+    expect(results[0]?.target).toBe(2);
   });
 });

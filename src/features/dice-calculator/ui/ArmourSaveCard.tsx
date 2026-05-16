@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from "react";
+import { useState, useMemo, type ReactElement } from "react";
 import { Shield } from "lucide-react";
 import {
   MODIFIER_CONFIGS,
@@ -9,6 +9,7 @@ import {
   type ModifierId,
   type SaveBaseTarget,
 } from "@/entities/dice";
+import { activeNumericModifierSum } from "@/entities/dice/lib/compute";
 import { modifierSortKey } from "@/entities/dice/model/modifiers";
 import { ModifierGroup } from "@/shared/ui/modifier-group";
 import {
@@ -19,6 +20,8 @@ import { ResultBadge } from "@/shared/ui/result-badge";
 import { SaveStepper } from "@/shared/ui/save-stepper";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
+import { ArmourSaveChartPanel } from "./ArmourSaveChartPanel";
+import { StatChartToggleButton } from "./StatChartToggleButton";
 
 function sorted(configs: readonly ModifierConfig[]): ModifierConfig[] {
   return [...configs].sort((a, b) => {
@@ -36,6 +39,8 @@ type RenderRow = (config: ModifierConfig, tone?: ModifierTone) => ReactElement;
 export function ArmourSaveCard({
   state,
   attackMode,
+  baseStrength,
+  effectiveStrength,
   result,
   onSetSaveTarget,
   onToggleModifier,
@@ -46,6 +51,8 @@ export function ArmourSaveCard({
 }: {
   state: CardState;
   attackMode: AttackMode;
+  baseStrength: number;
+  effectiveStrength: number;
   result: ComputedCardResult;
   onSetSaveTarget: (value: SaveBaseTarget) => void;
   onToggleModifier: (id: ModifierId) => void;
@@ -57,8 +64,10 @@ export function ArmourSaveCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const [chartOpen, setChartOpen] = useState(false);
   const activeModifiers =
     attackMode === "melee" ? state.modifiers : state.modifiersShooting;
+  const asModSum = activeNumericModifierSum(activeModifiers);
   const ARMOUR_SAVE_CONFIGS = useMemo(
     () =>
       MODIFIER_CONFIGS.filter(
@@ -179,6 +188,22 @@ export function ArmourSaveCard({
       title="Armour Save"
       subtitle="AS"
       infoText="Base armour save, modified by toggles plus the auto-derived Strength penalty (S4→-1, S5→-2, …) from the To Wound card."
+      headerActions={
+        <StatChartToggleButton
+          pressed={chartOpen}
+          onPressedChange={setChartOpen}
+        />
+      }
+      chartPanel={
+        chartOpen ? (
+          <ArmourSaveChartPanel
+            baseAS={state.inputs.baseTarget ?? 6}
+            baseS={baseStrength}
+            effectiveS={effectiveStrength}
+            asModSum={asModSum}
+          />
+        ) : undefined
+      }
       inputs={
         <SaveStepper
           label="Base Armour Save"

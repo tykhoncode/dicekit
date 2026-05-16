@@ -10,7 +10,8 @@ export const IMPOSSIBLE_GLYPH = "✕";
 
 export function formatTarget(target: DisplayedTarget): string {
   if (typeof target === "number") return `${target}+`;
-  if (target === "impossible") return IMPOSSIBLE_GLYPH;
+  if (target === "impossible" || target === "no-save" || target === "no-ward")
+    return IMPOSSIBLE_GLYPH;
   return UNROLLABLE_GLYPH;
 }
 

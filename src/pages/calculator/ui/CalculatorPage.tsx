@@ -9,6 +9,7 @@ import {
   useDiceCalculator,
   WardSaveCard,
 } from "@/features/dice-calculator";
+import { getEffectiveStrength } from "@/entities/dice/lib/compute";
 
 export function CalculatorPage() {
   const calc = useDiceCalculator();
@@ -57,6 +58,8 @@ export function CalculatorPage() {
         <ArmourSaveCard
           state={state.armourSave}
           attackMode={attackMode}
+          baseStrength={state.toWound.inputs.strength ?? 3}
+          effectiveStrength={getEffectiveStrength(state.toWound, attackMode)}
           result={results.armourSave}
           onSetSaveTarget={(v) => actions.setSaveTarget("armourSave", v)}
           onToggleModifier={(id) => actions.toggleModifier("armourSave", id)}

@@ -8,11 +8,14 @@ describe("formatTarget", () => {
     expect(formatTarget(6)).toBe("6+");
   });
 
-  it("renders unrollable markers as the em-dash glyph", () => {
+  it("renders auto-pass and auto-fail as the em-dash glyph", () => {
     expect(formatTarget("auto-fail")).toBe("—");
     expect(formatTarget("auto-pass")).toBe("—");
-    expect(formatTarget("no-save")).toBe("—");
-    expect(formatTarget("no-ward")).toBe("—");
+  });
+
+  it("renders no-save and no-ward as the impossible glyph", () => {
+    expect(formatTarget("no-save")).toBe("✕");
+    expect(formatTarget("no-ward")).toBe("✕");
   });
 });
 

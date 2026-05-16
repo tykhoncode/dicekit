@@ -41,7 +41,9 @@ function numericContribution(
   return ev * sv;
 }
 
-function activeNumericModifierSum(modifiers: readonly ModifierState[]): number {
+export function activeNumericModifierSum(
+  modifiers: readonly ModifierState[],
+): number {
   let total = 0;
   for (const state of modifiers) {
     if (!state.active) continue;
@@ -265,25 +267,37 @@ function statLabel(base: number, effective: number): string {
   return base === effective ? `${base}` : `(${base}→${effective})`;
 }
 
+export function getEffectiveAttackerWS(toHit: CardState): number {
+  const baseA = toHit.inputs.attackerWS ?? INITIAL_DEFAULTS.attackerWS;
+  const aPre = activeForceWS(toHit.modifiers, "pre").attacker ?? baseA;
+  const magicForce = activeForceWS(toHit.modifiers, "magic").attacker;
+  const aMagic = clampWS(
+    (magicForce ?? aPre) + activeDeltaWS(toHit.modifiers, "magic").attacker,
+  );
+  const postForce = activeForceWS(toHit.modifiers, "post").attacker;
+  return clampWS(
+    (postForce ?? aMagic) + activeDeltaWS(toHit.modifiers, "post").attacker,
+  );
+}
+
+export function getEffectiveDefenderWS(toHit: CardState): number {
+  const baseD = toHit.inputs.defenderWS ?? INITIAL_DEFAULTS.defenderWS;
+  const dPre = activeForceWS(toHit.modifiers, "pre").defender ?? baseD;
+  const magicForce = activeForceWS(toHit.modifiers, "magic").defender;
+  const dMagic = clampWS(
+    (magicForce ?? dPre) + activeDeltaWS(toHit.modifiers, "magic").defender,
+  );
+  const postForce = activeForceWS(toHit.modifiers, "post").defender;
+  return clampWS(
+    (postForce ?? dMagic) + activeDeltaWS(toHit.modifiers, "post").defender,
+  );
+}
+
 function explainToHitMelee(toHit: CardState): CardBreakdown {
   const baseA = toHit.inputs.attackerWS ?? INITIAL_DEFAULTS.attackerWS;
   const baseD = toHit.inputs.defenderWS ?? INITIAL_DEFAULTS.defenderWS;
-
-  const preForce = activeForceWS(toHit.modifiers, "pre");
-  const aPre = preForce.attacker ?? baseA;
-  const dPre = preForce.defender ?? baseD;
-
-  const magicForce = activeForceWS(toHit.modifiers, "magic");
-  const magicDelta = activeDeltaWS(toHit.modifiers, "magic");
-  const aMagic = clampWS((magicForce.attacker ?? aPre) + magicDelta.attacker);
-  const dMagic = clampWS((magicForce.defender ?? dPre) + magicDelta.defender);
-
-  const postForce = activeForceWS(toHit.modifiers, "post");
-  const postDelta = activeDeltaWS(toHit.modifiers, "post");
-  let a = postForce.attacker ?? aMagic;
-  let d = postForce.defender ?? dMagic;
-  a = clampWS(a + postDelta.attacker);
-  d = clampWS(d + postDelta.defender);
+  const a = getEffectiveAttackerWS(toHit);
+  const d = getEffectiveDefenderWS(toHit);
 
   const chartTarget = parseTarget(lookupToHit(a, d));
   const modSum = activeNumericModifierSum(toHit.modifiers);
@@ -304,10 +318,15 @@ function explainToHitMelee(toHit: CardState): CardBreakdown {
   return { rawTarget: computed, steps };
 }
 
-function explainToHitShooting(toHit: CardState): CardBreakdown {
+export function getEffectiveAttackerBS(toHit: CardState): number {
   const baseBS = toHit.inputs.attackerBS ?? INITIAL_DEFAULTS.attackerBS;
   const bsDelta = activeDeltaBS(toHit.modifiersShooting);
-  const effectiveBS = clampBS(baseBS + bsDelta);
+  return clampBS(baseBS + bsDelta);
+}
+
+function explainToHitShooting(toHit: CardState): CardBreakdown {
+  const effectiveBS = getEffectiveAttackerBS(toHit);
+  const baseBS = toHit.inputs.attackerBS ?? INITIAL_DEFAULTS.attackerBS;
   const chartTarget = Math.max(2, Math.min(6, 7 - effectiveBS));
   const modSum = activeNumericModifierSum(toHit.modifiersShooting);
   const computed = chartTarget - modSum;

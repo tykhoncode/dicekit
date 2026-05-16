@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import {
   MODIFIER_CONFIGS,
   type AttackMode,
@@ -8,6 +8,13 @@ import {
   type ModifierId,
 } from "@/entities/dice";
 import { modifierSortKey } from "@/entities/dice/model/modifiers";
+import { lookupToHit } from "@/entities/dice/lib/charts";
+import {
+  activeNumericModifierSum,
+  getEffectiveAttackerBS,
+  getEffectiveAttackerWS,
+  getEffectiveDefenderWS,
+} from "@/entities/dice/lib/compute";
 import { ModifierGroup } from "@/shared/ui/modifier-group";
 import {
   ModifierToggleRow,
@@ -19,6 +26,9 @@ import { ResultBadge } from "@/shared/ui/result-badge";
 import { effectLabel } from "../lib/effectLabel";
 import { AttackModeTabs } from "./AttackModeTabs";
 import { CalculatorCard } from "./CalculatorCard";
+import { StatChartPanel } from "./StatChartPanel";
+import { StatChartToggleButton } from "./StatChartToggleButton";
+import { ShootingChartPanel } from "./ShootingChartPanel";
 
 /** Faction Rules pinned to the bottom in this exact order. */
 const FACTION_RULES_BOTTOM: readonly string[] = [
@@ -96,6 +106,7 @@ export function ToHitCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const [chartOpen, setChartOpen] = useState(false);
   const isShooting = attackMode === "shooting";
   const activeModifiers = isShooting
     ? state.modifiersShooting
@@ -410,6 +421,35 @@ export function ToHitCard({
             </ModifierGroup>
           )}
         </>
+      }
+      headerActions={
+        <StatChartToggleButton
+          pressed={chartOpen}
+          onPressedChange={setChartOpen}
+        />
+      }
+      chartPanel={
+        chartOpen ? (
+          attackMode === "melee" ? (
+            <StatChartPanel
+              rowLabel="Attacker WS"
+              colLabel="Defender WS"
+              lookup={lookupToHit}
+              baseRow={state.inputs.attackerWS ?? 3}
+              baseCol={state.inputs.defenderWS ?? 3}
+              effectiveRow={getEffectiveAttackerWS(state)}
+              effectiveCol={getEffectiveDefenderWS(state)}
+              directModSum={activeNumericModifierSum(activeModifiers)}
+              finalTarget={result.target}
+            />
+          ) : (
+            <ShootingChartPanel
+              baseBS={state.inputs.attackerBS ?? 3}
+              effectiveBS={getEffectiveAttackerBS(state)}
+              directModSum={activeNumericModifierSum(activeModifiers)}
+            />
+          )
+        ) : undefined
       }
       steps={result.steps}
       result={

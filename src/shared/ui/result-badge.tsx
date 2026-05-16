@@ -46,7 +46,9 @@ export function ResultBadge({
         <span
           className={cn(
             "font-heading text-5xl font-bold tabular-nums",
-            target === "impossible"
+            target === "impossible" ||
+              target === "no-save" ||
+              target === "no-ward"
               ? "text-muted-foreground"
               : "text-[color:var(--accent-result)]",
           )}

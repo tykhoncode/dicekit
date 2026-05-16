@@ -146,7 +146,8 @@ export const ImpossibleToHit: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await expect(canvas.getByText("✕")).toBeInTheDocument();
+    const crosses = canvas.getAllByText("✕");
+    await expect(crosses.length).toBeGreaterThan(0);
     await expect(canvas.getByText("To Hit")).toBeInTheDocument();
   },
 };
