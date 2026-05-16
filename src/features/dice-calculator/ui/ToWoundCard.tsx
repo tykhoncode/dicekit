@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from "react";
 import { Flame } from "lucide-react";
 import {
   MODIFIER_CONFIGS,
+  type AttackMode,
   type CardState,
   type ComputedCardResult,
   type ModifierConfig,
@@ -14,11 +15,10 @@ import {
   type ModifierTone,
 } from "@/shared/ui/modifier-toggle-row";
 import { NumberStepper } from "@/shared/ui/number-stepper";
+import { Separator } from "@/shared/ui/separator";
 import { ResultBadge } from "@/shared/ui/result-badge";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
-
-const TO_WOUND_MODIFIERS = MODIFIER_CONFIGS.filter((m) => m.card === "toWound");
 
 function sorted(configs: readonly ModifierConfig[]): ModifierConfig[] {
   return [...configs].sort(
@@ -31,6 +31,7 @@ type RenderRow = (config: ModifierConfig, tone?: ModifierTone) => ReactElement;
 
 export function ToWoundCard({
   state,
+  attackMode,
   result,
   onSetStat,
   onToggleModifier,
@@ -40,6 +41,7 @@ export function ToWoundCard({
   onTogglePinned,
 }: {
   state: CardState;
+  attackMode: AttackMode;
   result: ComputedCardResult;
   onSetStat: (key: "strength" | "toughness", value: number) => void;
   onToggleModifier: (id: ModifierId) => void;
@@ -51,11 +53,22 @@ export function ToWoundCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const activeModifiers =
+    attackMode === "melee" ? state.modifiers : state.modifiersShooting;
+  const TO_WOUND_CONFIGS = useMemo(
+    () =>
+      MODIFIER_CONFIGS.filter(
+        (c) =>
+          c.card === "toWound" &&
+          (c.mode === undefined || c.mode === attackMode),
+      ),
+    [attackMode],
+  );
   const strength = state.inputs.strength ?? 3;
   const toughness = state.inputs.toughness ?? 3;
   const stateById = useMemo(
-    () => new Map(state.modifiers.map((m) => [m.id, m])),
-    [state.modifiers],
+    () => new Map(activeModifiers.map((m) => [m.id, m])),
+    [activeModifiers],
   );
 
   const groupedConfigs = useMemo(() => {
@@ -67,7 +80,7 @@ export function ToWoundCard({
     const racialArtifactsMap = new Map<string, ModifierConfig[]>();
     const racialAbilitiesMap = new Map<string, ModifierConfig[]>();
     const raceWeaponsMap = new Map<string, ModifierConfig[]>();
-    for (const c of TO_WOUND_MODIFIERS) {
+    for (const c of TO_WOUND_CONFIGS) {
       switch (c.category ?? "general") {
         case "general":
           general.push(c);
@@ -131,7 +144,7 @@ export function ToWoundCard({
       }),
       custom: sorted(custom),
     };
-  }, []);
+  }, [TO_WOUND_CONFIGS]);
 
   const isAutoResult = (c: ModifierConfig) => c.effect.kind === "auto-result";
   const isPinned = (c: ModifierConfig) => Boolean(stateById.get(c.id)?.pinned);
@@ -158,7 +171,7 @@ export function ToWoundCard({
   const pinnedRows = useMemo(
     () =>
       sorted(
-        TO_WOUND_MODIFIERS.filter(
+        TO_WOUND_CONFIGS.filter(
           (c) =>
             !isAutoResult(c) &&
             isPinned(c) &&
@@ -166,7 +179,7 @@ export function ToWoundCard({
         ),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.modifiers],
+    [activeModifiers, TO_WOUND_CONFIGS],
   );
 
   const pinnedIds = new Set(pinnedRows.map((c) => c.id));
@@ -283,12 +296,13 @@ export function ToWoundCard({
       inputs={
         <>
           <NumberStepper
-            label="Strength"
+            label="Attacker S"
             value={strength}
             onChange={(v) => onSetStat("strength", v)}
           />
+          <Separator orientation="vertical" />
           <NumberStepper
-            label="Toughness"
+            label="Defender T"
             value={toughness}
             onChange={(v) => onSetStat("toughness", v)}
           />

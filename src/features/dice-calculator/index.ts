@@ -1,6 +1,7 @@
 export { useDiceCalculator } from "./model/useDiceCalculator";
 export type { UseDiceCalculatorReturn } from "./model/useDiceCalculator";
 export { AppShell } from "./ui/AppShell";
+export { AttackModeTabs } from "./ui/AttackModeTabs";
 export { CalculatorCard } from "./ui/CalculatorCard";
 export { CalculatorGrid } from "./ui/CalculatorGrid";
 export { ToHitCard } from "./ui/ToHitCard";

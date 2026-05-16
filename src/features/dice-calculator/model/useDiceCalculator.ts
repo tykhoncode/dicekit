@@ -3,6 +3,7 @@ import {
   computeFullState,
   createInitialState,
   MODIFIER_CONFIGS,
+  type AttackMode,
   type CardKind,
   type ComputedCardResult,
   type FullState,
@@ -54,6 +55,7 @@ export type UseDiceCalculatorReturn = {
   };
   outcome: Outcome;
   actions: {
+    setAttackMode: (mode: AttackMode) => void;
     setStat: (card: CardKind, key: StatKey, value: number) => void;
     setSaveTarget: (
       card: "armourSave" | "wardSave",
@@ -102,47 +104,63 @@ export function useDiceCalculator(): UseDiceCalculatorReturn {
     [],
   );
 
+  const arrayKey = (mode: AttackMode): "modifiers" | "modifiersShooting" =>
+    mode === "melee" ? "modifiers" : "modifiersShooting";
+
+  const setAttackMode = useCallback((mode: AttackMode) => {
+    setState((prev) => ({ ...prev, attackMode: mode }));
+  }, []);
+
   const toggleModifier = useCallback((card: CardKind, id: ModifierId) => {
-    setState((prev) => ({
-      ...prev,
-      [card]: {
-        ...prev[card],
-        modifiers: upsertModifier(prev[card].modifiers, id, (m) => ({
-          ...m,
-          active: !m.active,
-        })),
-      },
-    }));
+    setState((prev) => {
+      const key = arrayKey(prev.attackMode);
+      return {
+        ...prev,
+        [card]: {
+          ...prev[card],
+          [key]: upsertModifier(prev[card][key], id, (m) => ({
+            ...m,
+            active: !m.active,
+          })),
+        },
+      };
+    });
   }, []);
 
   const setModifierValue = useCallback(
     (card: CardKind, id: ModifierId, value: number) => {
-      setState((prev) => ({
-        ...prev,
-        [card]: {
-          ...prev[card],
-          modifiers: upsertModifier(prev[card].modifiers, id, (m) => ({
-            ...m,
-            value,
-          })),
-        },
-      }));
+      setState((prev) => {
+        const key = arrayKey(prev.attackMode);
+        return {
+          ...prev,
+          [card]: {
+            ...prev[card],
+            [key]: upsertModifier(prev[card][key], id, (m) => ({
+              ...m,
+              value,
+            })),
+          },
+        };
+      });
     },
     [],
   );
 
   const setModifierValueDef = useCallback(
     (card: CardKind, id: ModifierId, value: number) => {
-      setState((prev) => ({
-        ...prev,
-        [card]: {
-          ...prev[card],
-          modifiers: upsertModifier(prev[card].modifiers, id, (m) => ({
-            ...m,
-            valueDef: value,
-          })),
-        },
-      }));
+      setState((prev) => {
+        const key = arrayKey(prev.attackMode);
+        return {
+          ...prev,
+          [card]: {
+            ...prev[card],
+            [key]: upsertModifier(prev[card][key], id, (m) => ({
+              ...m,
+              valueDef: value,
+            })),
+          },
+        };
+      });
     },
     [],
   );
@@ -153,31 +171,37 @@ export function useDiceCalculator(): UseDiceCalculatorReturn {
       id: ModifierId,
       target: "attacker" | "defender" | "both",
     ) => {
-      setState((prev) => ({
-        ...prev,
-        [card]: {
-          ...prev[card],
-          modifiers: upsertModifier(prev[card].modifiers, id, (m) => ({
-            ...m,
-            target,
-          })),
-        },
-      }));
+      setState((prev) => {
+        const key = arrayKey(prev.attackMode);
+        return {
+          ...prev,
+          [card]: {
+            ...prev[card],
+            [key]: upsertModifier(prev[card][key], id, (m) => ({
+              ...m,
+              target,
+            })),
+          },
+        };
+      });
     },
     [],
   );
 
   const togglePinned = useCallback((card: CardKind, id: ModifierId) => {
-    setState((prev) => ({
-      ...prev,
-      [card]: {
-        ...prev[card],
-        modifiers: upsertModifier(prev[card].modifiers, id, (m) => ({
-          ...m,
-          pinned: !m.pinned,
-        })),
-      },
-    }));
+    setState((prev) => {
+      const key = arrayKey(prev.attackMode);
+      return {
+        ...prev,
+        [card]: {
+          ...prev[card],
+          [key]: upsertModifier(prev[card][key], id, (m) => ({
+            ...m,
+            pinned: !m.pinned,
+          })),
+        },
+      };
+    });
   }, []);
 
   const resetAll = useCallback(() => {
@@ -199,6 +223,7 @@ export function useDiceCalculator(): UseDiceCalculatorReturn {
     results: namedResults,
     outcome,
     actions: {
+      setAttackMode,
       setStat,
       setSaveTarget,
       toggleModifier,

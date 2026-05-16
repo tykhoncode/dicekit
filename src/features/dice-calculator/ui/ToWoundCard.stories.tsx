@@ -25,6 +25,7 @@ function Live({ activate = [] }: { activate?: ModifierId[] }) {
     <div className="dark w-72">
       <ToWoundCard
         state={calc.state.toWound}
+        attackMode={calc.state.attackMode}
         result={calc.results.toWound}
         onSetStat={(key, value) => calc.actions.setStat("toWound", key, value)}
         onToggleModifier={(id) => calc.actions.toggleModifier("toWound", id)}

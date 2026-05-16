@@ -14,6 +14,7 @@ export function CalculatorCard({
   icon,
   title,
   subtitle,
+  headerSlot,
   infoText,
   inputs,
   modifiers,
@@ -21,9 +22,11 @@ export function CalculatorCard({
   result,
   className,
 }: {
-  icon: ReactNode;
-  title: string;
-  subtitle: string;
+  icon?: ReactNode;
+  title?: string;
+  subtitle?: string;
+  /** When provided, replaces the title+subtitle column entirely. */
+  headerSlot?: ReactNode;
   infoText: string;
   inputs: ReactNode;
   modifiers: ReactNode;
@@ -39,25 +42,31 @@ export function CalculatorCard({
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-2 px-4">
+      <div className="flex min-h-14 items-center justify-between gap-2 px-4">
         <div className="flex items-center gap-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-2xl bg-foreground/10 text-foreground/80 [&_svg]:size-4">
-            {icon}
-          </span>
-          <div className="flex min-w-0 flex-col">
-            <span className="font-heading text-sm font-semibold tracking-tight">
-              {title}
+          {icon && (
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-2xl bg-foreground/10 text-foreground/80 [&_svg]:size-4">
+              {icon}
             </span>
-            <span className="truncate text-[11px] text-muted-foreground">
-              {subtitle}
-            </span>
-          </div>
+          )}
+          {headerSlot ? (
+            <div className="flex min-w-0 flex-1 flex-col">{headerSlot}</div>
+          ) : (
+            <div className="flex min-w-0 flex-col">
+              <span className="font-heading text-sm font-semibold tracking-tight">
+                {title}
+              </span>
+              <span className="truncate text-[11px] text-muted-foreground">
+                {subtitle}
+              </span>
+            </div>
+          )}
         </div>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger
               type="button"
-              aria-label={`${title} — about`}
+              aria-label={title ? `${title} — about` : "About"}
               className="rounded-full p-1 text-muted-foreground outline-none transition-colors hover:bg-muted/40 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/40"
             >
               <Info className="size-4" />
@@ -66,7 +75,7 @@ export function CalculatorCard({
           </Tooltip>
         </TooltipProvider>
       </div>
-      <div className="flex flex-wrap gap-3 px-4">{inputs}</div>
+      <div className="flex flex-wrap items-center gap-6 px-4">{inputs}</div>
       <Separator />
       <div className="scrollbar-slim flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3">
         {modifiers}

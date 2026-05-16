@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from "react";
-import { Swords } from "lucide-react";
 import {
   MODIFIER_CONFIGS,
+  type AttackMode,
   type CardState,
   type ComputedCardResult,
   type ModifierConfig,
@@ -14,11 +14,11 @@ import {
   type ModifierTone,
 } from "@/shared/ui/modifier-toggle-row";
 import { NumberStepper } from "@/shared/ui/number-stepper";
+import { Separator } from "@/shared/ui/separator";
 import { ResultBadge } from "@/shared/ui/result-badge";
 import { effectLabel } from "../lib/effectLabel";
+import { AttackModeTabs } from "./AttackModeTabs";
 import { CalculatorCard } from "./CalculatorCard";
-
-const TO_HIT_MODIFIERS = MODIFIER_CONFIGS.filter((m) => m.card === "toHit");
 
 /** Faction Rules pinned to the bottom in this exact order. */
 const FACTION_RULES_BOTTOM: readonly string[] = [
@@ -29,18 +29,49 @@ const FACTION_RULES_BOTTOM: readonly string[] = [
   "toHit:stolenCrowns",
 ];
 
-function sorted(configs: readonly ModifierConfig[]): ModifierConfig[] {
-  return [...configs].sort(
-    (a, b) =>
-      modifierSortKey(a) - modifierSortKey(b) || a.label.localeCompare(b.label),
-  );
+/** Top-of-list ordering for the shooting general group. */
+const SHOOTING_TOP: readonly string[] = [
+  "toHit:shoot:longRange",
+  "toHit:shoot:moving",
+  "toHit:shoot:behindUnit",
+  "toHit:shoot:multipleShots",
+  "toHit:shoot:targetSkirmisher",
+  "toHit:shoot:sniper",
+  "toHit:shoot:standAndShoot",
+];
+
+/** Top-of-list ordering for the shooting terrain group. */
+const SHOOTING_TERRAIN_TOP: readonly string[] = [
+  "toHit:shoot:softCover",
+  "toHit:shoot:hardCover",
+];
+
+function sorted(
+  configs: readonly ModifierConfig[],
+  topOrder?: readonly string[],
+): ModifierConfig[] {
+  const priority = (c: ModifierConfig): number => {
+    if (!topOrder) return Infinity;
+    const idx = topOrder.indexOf(c.id);
+    return idx === -1 ? Infinity : idx;
+  };
+  return [...configs].sort((a, b) => {
+    const pa = priority(a);
+    const pb = priority(b);
+    if (pa !== pb) return pa - pb;
+    return (
+      modifierSortKey(a) - modifierSortKey(b) || a.label.localeCompare(b.label)
+    );
+  });
 }
 
 type RenderRow = (config: ModifierConfig, tone?: ModifierTone) => ReactElement;
 
 export function ToHitCard({
   state,
+  attackMode,
   result,
+  onSetAttackMode,
   onSetStat,
   onToggleModifier,
   onSetModifierValue,
@@ -49,8 +80,13 @@ export function ToHitCard({
   onTogglePinned,
 }: {
   state: CardState;
+  attackMode: AttackMode;
   result: ComputedCardResult;
-  onSetStat: (key: "attackerWS" | "defenderWS", value: number) => void;
+  onSetAttackMode: (mode: AttackMode) => void;
+  onSetStat: (
+    key: "attackerWS" | "defenderWS" | "attackerBS",
+    value: number,
+  ) => void;
   onToggleModifier: (id: ModifierId) => void;
   onSetModifierValue: (id: ModifierId, value: number) => void;
   onSetModifierValueDef: (id: ModifierId, value: number) => void;
@@ -60,11 +96,23 @@ export function ToHitCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const isShooting = attackMode === "shooting";
+  const activeModifiers = isShooting
+    ? state.modifiersShooting
+    : state.modifiers;
+  const TO_HIT_CONFIGS = useMemo(
+    () =>
+      MODIFIER_CONFIGS.filter(
+        (c) =>
+          c.card === "toHit" && (c.mode === undefined || c.mode === attackMode),
+      ),
+    [attackMode],
+  );
   const attackerWS = state.inputs.attackerWS ?? 3;
   const defenderWS = state.inputs.defenderWS ?? 3;
   const stateById = useMemo(
-    () => new Map(state.modifiers.map((m) => [m.id, m])),
-    [state.modifiers],
+    () => new Map(activeModifiers.map((m) => [m.id, m])),
+    [activeModifiers],
   );
 
   const groupedConfigs = useMemo(() => {
@@ -75,7 +123,7 @@ export function ToHitCard({
     const custom: ModifierConfig[] = [];
     const racialArtifactsMap = new Map<string, ModifierConfig[]>();
     const racialAbilitiesMap = new Map<string, ModifierConfig[]>();
-    for (const c of TO_HIT_MODIFIERS) {
+    for (const c of TO_HIT_CONFIGS) {
       switch (c.category ?? "general") {
         case "general":
           general.push(c);
@@ -114,7 +162,10 @@ export function ToHitCard({
       a.label.localeCompare(b.label),
     );
     return {
-      general: sorted(general),
+      general: sorted(
+        general,
+        attackMode === "shooting" ? SHOOTING_TOP : undefined,
+      ),
       spells: spellsSorted,
       brbArtifacts: sorted(brbArtifacts),
       racialArtifacts: sortByRace(racialArtifactsMap).map(([race, arr]) => ({
@@ -132,10 +183,13 @@ export function ToHitCard({
           a.label.localeCompare(b.label)
         );
       }),
-      terrain: sorted(terrain),
+      terrain: sorted(
+        terrain,
+        attackMode === "shooting" ? SHOOTING_TERRAIN_TOP : undefined,
+      ),
       custom: sorted(custom),
     };
-  }, []);
+  }, [TO_HIT_CONFIGS, attackMode]);
 
   const isAutoResult = (c: ModifierConfig) => c.effect.kind === "auto-result";
   const isPinned = (c: ModifierConfig) => Boolean(stateById.get(c.id)?.pinned);
@@ -160,7 +214,7 @@ export function ToHitCard({
   const pinnedRows = useMemo(
     () =>
       sorted(
-        TO_HIT_MODIFIERS.filter(
+        TO_HIT_CONFIGS.filter(
           (c) =>
             !isAutoResult(c) &&
             isPinned(c) &&
@@ -169,7 +223,7 @@ export function ToHitCard({
       ),
     // recompute when pin state changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.modifiers],
+    [activeModifiers, TO_HIT_CONFIGS],
   );
 
   const pinnedIds = new Set(pinnedRows.map((c) => c.id));
@@ -280,23 +334,36 @@ export function ToHitCard({
 
   return (
     <CalculatorCard
-      icon={<Swords />}
-      title="To Hit"
-      subtitle="WS vs WS"
-      infoText="Lookup the WHFB 8th Edition close-combat To Hit chart, then apply active modifiers."
+      headerSlot={
+        <AttackModeTabs value={attackMode} onChange={onSetAttackMode} />
+      }
+      infoText={
+        isShooting
+          ? "Required = 7 − BS, clamped to [2, 6], then apply active shooting modifiers."
+          : "Lookup the WHFB 8th Edition close-combat To Hit chart, then apply active modifiers."
+      }
       inputs={
-        <>
+        isShooting ? (
           <NumberStepper
-            label="Attacker WS"
-            value={attackerWS}
-            onChange={(v) => onSetStat("attackerWS", v)}
+            label="Attacker BS"
+            value={state.inputs.attackerBS ?? 3}
+            onChange={(v) => onSetStat("attackerBS", v)}
           />
-          <NumberStepper
-            label="Defender WS"
-            value={defenderWS}
-            onChange={(v) => onSetStat("defenderWS", v)}
-          />
-        </>
+        ) : (
+          <>
+            <NumberStepper
+              label="Attacker WS"
+              value={attackerWS}
+              onChange={(v) => onSetStat("attackerWS", v)}
+            />
+            <Separator orientation="vertical" />
+            <NumberStepper
+              label="Defender WS"
+              value={defenderWS}
+              onChange={(v) => onSetStat("defenderWS", v)}
+            />
+          </>
+        )
       }
       modifiers={
         <>
@@ -348,6 +415,7 @@ export function ToHitCard({
       result={
         <ResultBadge
           target={result.target}
+          cascade={result.cascade}
           probability={result.probability}
           kind="toHit"
         />

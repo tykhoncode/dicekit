@@ -13,6 +13,7 @@ import {
 export function CalculatorPage() {
   const calc = useDiceCalculator();
   const { state, results, outcome, actions } = calc;
+  const attackMode = state.attackMode;
 
   return (
     <AppShell>
@@ -20,6 +21,8 @@ export function CalculatorPage() {
       <CalculatorGrid>
         <ToHitCard
           state={state.toHit}
+          attackMode={attackMode}
+          onSetAttackMode={actions.setAttackMode}
           result={results.toHit}
           onSetStat={(key, value) => actions.setStat("toHit", key, value)}
           onToggleModifier={(id) => actions.toggleModifier("toHit", id)}
@@ -36,6 +39,7 @@ export function CalculatorPage() {
         />
         <ToWoundCard
           state={state.toWound}
+          attackMode={attackMode}
           result={results.toWound}
           onSetStat={(key, value) => actions.setStat("toWound", key, value)}
           onToggleModifier={(id) => actions.toggleModifier("toWound", id)}
@@ -52,6 +56,7 @@ export function CalculatorPage() {
         />
         <ArmourSaveCard
           state={state.armourSave}
+          attackMode={attackMode}
           result={results.armourSave}
           onSetSaveTarget={(v) => actions.setSaveTarget("armourSave", v)}
           onToggleModifier={(id) => actions.toggleModifier("armourSave", id)}
@@ -68,6 +73,7 @@ export function CalculatorPage() {
         />
         <WardSaveCard
           state={state.wardSave}
+          attackMode={attackMode}
           result={results.wardSave}
           onSetSaveTarget={(v) => actions.setSaveTarget("wardSave", v)}
           onToggleModifier={(id) => actions.toggleModifier("wardSave", id)}

@@ -6,9 +6,11 @@ import type {
 } from "@/entities/dice/model/types";
 
 export const UNROLLABLE_GLYPH = "—";
+export const IMPOSSIBLE_GLYPH = "✕";
 
 export function formatTarget(target: DisplayedTarget): string {
   if (typeof target === "number") return `${target}+`;
+  if (target === "impossible") return IMPOSSIBLE_GLYPH;
   return UNROLLABLE_GLYPH;
 }
 
@@ -20,6 +22,7 @@ export function formatProbability(
   if (target === "auto-fail") return "Auto-fail";
   if (target === "no-save") return "No save";
   if (target === "no-ward") return "No ward";
+  if (target === "impossible") return "Cannot hit";
   if (target === "auto-pass") {
     return kind === "toHit" ? "Hits automatically" : "Wounds automatically";
   }

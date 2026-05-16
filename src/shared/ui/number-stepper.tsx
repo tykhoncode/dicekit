@@ -21,7 +21,7 @@ export function NumberStepper({
   const increment = () => onChange(Math.min(max, value + 1));
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("flex flex-col items-center gap-1.5", className)}>
       <span className="text-lg font-medium text-foreground">{label}</span>
       <div className="flex items-center gap-1.5">
         <Button

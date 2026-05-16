@@ -6,6 +6,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:autoHit",
     card: "toHit",
+    mode: "melee",
     label: "Hits Automatically",
     effect: { kind: "auto-result", value: "pass" },
     category: "general",
@@ -13,6 +14,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:fear",
     card: "toHit",
+    mode: "melee",
     label: "Fear (Failed Test)",
     effect: { kind: "force-ws", target: "attacker", value: 1 },
     category: "general",
@@ -23,6 +25,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:speedOfLight",
     card: "toHit",
+    mode: "melee",
     label: "Speed of Light",
     effect: { kind: "force-ws", target: "attacker", value: 10 },
     category: "spell",
@@ -31,6 +34,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:handOfGlory",
     card: "toHit",
+    mode: "melee",
     label: "Hand of Glory",
     effect: { kind: "delta-ws", target: "attacker", sign: 1 },
     variableValue: { min: 1, max: 3, default: 1 },
@@ -39,6 +43,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:melkothsMiasma",
     card: "toHit",
+    mode: "melee",
     label: "Melkoth's Miasma",
     effect: { kind: "delta-ws", target: "attacker", sign: -1 },
     variableValue: { min: 1, max: 3, default: 1 },
@@ -47,6 +52,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:wordOfPain",
     card: "toHit",
+    mode: "melee",
     label: "Word of Pain",
     effect: { kind: "delta-ws", target: "attacker", sign: -1 },
     variableValue: { min: 1, max: 3, default: 1 },
@@ -55,6 +61,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:miasmaOfPestilence",
     card: "toHit",
+    mode: "melee",
     label: "Miasma of Pestilence",
     effect: { kind: "delta-ws", target: "attacker", sign: -1 },
     variableValue: { min: 1, max: 3, default: 1 },
@@ -63,6 +70,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:transmutationOfLead",
     card: "toHit",
+    mode: "melee",
     label: "Transmutation of Lead",
     effect: { kind: "delta-ws", target: "attacker", sign: -1, magnitude: 1 },
     category: "spell",
@@ -70,6 +78,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:blissInTorment",
     card: "toHit",
+    mode: "melee",
     label: "Bliss in Torment",
     effect: { kind: "delta-ws", target: "attacker", sign: 1 },
     variableValue: { min: 1, max: 10, default: 1 },
@@ -85,6 +94,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:phasProtection",
     card: "toHit",
+    mode: "melee",
     label: "Pha's Protection",
     effect: { kind: "numeric", value: -1 },
     category: "spell",
@@ -92,6 +102,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:iceshardBlizzard",
     card: "toHit",
+    mode: "melee",
     label: "Iceshard Blizzard",
     effect: { kind: "numeric", value: -1 },
     category: "spell",
@@ -99,6 +110,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:tempest",
     card: "toHit",
+    mode: "melee",
     label: "Tempest",
     effect: { kind: "numeric", value: -1 },
     category: "spell",
@@ -106,6 +118,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:ashStorm",
     card: "toHit",
+    mode: "melee",
     label: "Ash Storm",
     effect: { kind: "numeric", value: -1 },
     category: "spell",
@@ -113,6 +126,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:curseOfAnraheir",
     card: "toHit",
+    mode: "melee",
     label: "The Curse of Anraheir",
     effect: { kind: "numeric", value: -1 },
     category: "spell",
@@ -122,6 +136,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:swordOfStriking",
     card: "toHit",
+    mode: "melee",
     label: "Sword of Striking",
     effect: { kind: "numeric", value: 1 },
     category: "brb-artifact",
@@ -129,6 +144,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:glitteringScales",
     card: "toHit",
+    mode: "melee",
     label: "Glittering Scales",
     effect: { kind: "numeric", value: -1 },
     category: "brb-artifact",
@@ -138,6 +154,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:runeOfTheTrueBeast",
     card: "toHit",
+    mode: "melee",
     label: "Rune of the True Beast",
     effect: { kind: "numeric", value: -1 },
     category: "race-artifact",
@@ -149,6 +166,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:sonsOfGhorros",
     card: "toHit",
+    mode: "melee",
     label: "The Sons of Ghorros",
     effect: { kind: "delta-ws", target: "attacker", sign: 1, magnitude: 1 },
     category: "race-ability",
@@ -159,6 +177,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:trialOfBlades",
     card: "toHit",
+    mode: "melee",
     label: "The Trial of Blades",
     effect: { kind: "numeric", value: 1 },
     category: "race-ability",
@@ -170,6 +189,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:stolenCrowns",
     card: "toHit",
+    mode: "melee",
     label: "The Stolen Crowns",
     effect: { kind: "delta-ws", target: "attacker", sign: 1, magnitude: 2 },
     category: "race-ability",
@@ -180,6 +200,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:tressOfIsoulde",
     card: "toHit",
+    mode: "melee",
     label: "Tress of Isoulde",
     effect: { kind: "force-target", value: 2 },
     category: "race-artifact",
@@ -189,6 +210,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:armourOfMidsummerSun",
     card: "toHit",
+    mode: "melee",
     label: "Armour of the Midsummer Sun",
     effect: { kind: "numeric", value: -1 },
     category: "race-artifact",
@@ -200,6 +222,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:daemonsOfNurgle",
     card: "toHit",
+    mode: "melee",
     label: "Daemons of Nurgle",
     effect: { kind: "numeric", value: -1 },
     category: "race-ability",
@@ -210,6 +233,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:enchantingBeauty",
     card: "toHit",
+    mode: "melee",
     label: "Enchanting Beauty",
     effect: { kind: "delta-ws", target: "attacker", sign: -1, magnitude: 5 },
     category: "race-ability",
@@ -222,6 +246,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:masterRuneSnorri",
     card: "toHit",
+    mode: "melee",
     label: "Master Rune of Snorri Spangelhelm",
     effect: { kind: "force-target", value: 2 },
     category: "race-artifact",
@@ -230,6 +255,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:runeOfStriking",
     card: "toHit",
+    mode: "melee",
     label: "Rune of Striking (1/2)",
     effect: { kind: "delta-ws", target: "attacker", sign: 1, magnitude: 1 },
     category: "race-artifact",
@@ -238,6 +264,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:runeOfStrikingX3",
     card: "toHit",
+    mode: "melee",
     label: "Rune of Striking (×3)",
     effect: { kind: "force-ws", target: "attacker", value: 10 },
     category: "race-artifact",
@@ -247,6 +274,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:runeOfDaemonSlaying",
     card: "toHit",
+    mode: "melee",
     label: "Rune of Daemon Slaying (×1/×2)",
     effect: { kind: "numeric", value: 1 },
     category: "race-artifact",
@@ -256,6 +284,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:runeOfDaemonSlayingX3",
     card: "toHit",
+    mode: "melee",
     label: "Rune of Daemon Slaying (×3)",
     effect: { kind: "force-target", value: 2 },
     category: "race-artifact",
@@ -265,6 +294,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:grudgeRune",
     card: "toHit",
+    mode: "melee",
     label: "Grudge Rune",
     effect: { kind: "numeric", value: 1 },
     category: "race-artifact",
@@ -274,6 +304,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:runeOfParrying",
     card: "toHit",
+    mode: "melee",
     label: "Rune of Parrying",
     effect: { kind: "numeric", value: -1 },
     category: "race-artifact",
@@ -283,6 +314,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:entrenchment",
     card: "toHit",
+    mode: "melee",
     label: "Entrenchment",
     effect: { kind: "numeric", value: -1 },
     category: "race-ability",
@@ -293,6 +325,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:whiteCloakOfUlric",
     card: "toHit",
+    mode: "melee",
     label: "White Cloak of Ulric",
     effect: { kind: "numeric", value: -1 },
     category: "race-artifact",
@@ -301,6 +334,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:portentsOfBattle",
     card: "toHit",
+    mode: "melee",
     label: "Portents of Battle",
     effect: { kind: "numeric", value: 1 },
     category: "race-ability",
@@ -311,6 +345,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:hornOfIsha",
     card: "toHit",
+    mode: "melee",
     label: "Horn of Isha",
     effect: { kind: "numeric", value: 1 },
     category: "race-artifact",
@@ -319,6 +354,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:bloodOath",
     card: "toHit",
+    mode: "melee",
     label: "Blood Oath",
     effect: { kind: "numeric", value: 1 },
     category: "race-ability",
@@ -330,6 +366,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:flailingFists",
     card: "toHit",
+    mode: "melee",
     label: "Flailing Fists",
     effect: { kind: "numeric", value: -1 },
     category: "race-ability",
@@ -340,6 +377,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:bannerOfTheBarrows",
     card: "toHit",
+    mode: "melee",
     label: "Banner of the Barrows",
     effect: { kind: "numeric", value: 1 },
     category: "race-artifact",
@@ -348,6 +386,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:battleOfWills",
     card: "toHit",
+    mode: "melee",
     label: "Battle of Wills",
     effect: { kind: "delta-ws", target: "attacker", sign: -1, magnitude: 1 },
     category: "race-ability",
@@ -356,6 +395,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:swarmOfFlies",
     card: "toHit",
+    mode: "melee",
     label: "Swarm of Flies",
     effect: { kind: "numeric", value: -1 },
     category: "race-ability",
@@ -366,6 +406,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:markOfNurgle",
     card: "toHit",
+    mode: "melee",
     label: "Mark of Nurgle",
     effect: { kind: "numeric", value: -1 },
     category: "race-ability",
@@ -376,6 +417,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:helmOfTheHunt",
     card: "toHit",
+    mode: "melee",
     label: "Helm of the Hunt (on charge)",
     effect: { kind: "delta-ws", target: "attacker", sign: 1, magnitude: 1 },
     category: "race-artifact",
@@ -387,6 +429,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:customWs",
     card: "toHit",
+    mode: "melee",
     label: "Custom WS",
     effect: { kind: "force-ws", target: "attacker", value: 1 },
     variableValue: { min: 1, max: 10, default: 1 },
@@ -395,6 +438,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:customWsDelta",
     card: "toHit",
+    mode: "melee",
     label: "Custom ±WS",
     effect: { kind: "delta-ws", target: "attacker", sign: 1 },
     variableValue: { min: -10, max: 10, default: 0 },
@@ -403,6 +447,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:customToHitDelta",
     card: "toHit",
+    mode: "melee",
     label: "Custom ±To Hit",
     effect: { kind: "numeric", value: 0 },
     variableValue: { min: -5, max: 5, default: 0 },
@@ -413,6 +458,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:fenceWall",
     card: "toHit",
+    mode: "melee",
     label: "Fence/Wall (on charge)",
     effect: { kind: "numeric", value: -1 },
     category: "terrain",
@@ -420,9 +466,143 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toHit:acropolisOfHeroes",
     card: "toHit",
+    mode: "melee",
     label: "Acropolis of Heroes",
     effect: { kind: "numeric", value: 1 },
     category: "terrain",
+  },
+
+  // ── To Hit (Shooting) ───────────────────────────────────────────────────
+  // General (uncategorized — rendered above collapsible groups)
+  {
+    id: "toHit:shoot:autoHit",
+    card: "toHit",
+    mode: "shooting",
+    label: "Hits Automatically",
+    effect: { kind: "auto-result", value: "pass" },
+    category: "general",
+  },
+  {
+    id: "toHit:shoot:longRange",
+    card: "toHit",
+    mode: "shooting",
+    label: "Long Range",
+    effect: { kind: "numeric", value: -1 },
+    category: "general",
+  },
+  {
+    id: "toHit:shoot:multipleShots",
+    card: "toHit",
+    mode: "shooting",
+    label: "Multiple Shots",
+    effect: { kind: "numeric", value: -1 },
+    category: "general",
+  },
+  {
+    id: "toHit:shoot:moving",
+    card: "toHit",
+    mode: "shooting",
+    label: "Moving & Shooting",
+    effect: { kind: "numeric", value: -1 },
+    category: "general",
+  },
+  {
+    id: "toHit:shoot:standAndShoot",
+    card: "toHit",
+    mode: "shooting",
+    label: "Stand & Shoot",
+    effect: { kind: "numeric", value: -1 },
+    category: "general",
+  },
+  {
+    id: "toHit:shoot:softCover",
+    card: "toHit",
+    mode: "shooting",
+    label: "Soft Cover",
+    effect: { kind: "numeric", value: -1 },
+    category: "terrain",
+  },
+  {
+    id: "toHit:shoot:hardCover",
+    card: "toHit",
+    mode: "shooting",
+    label: "Hard Cover",
+    effect: { kind: "numeric", value: -2 },
+    category: "terrain",
+  },
+  {
+    id: "toHit:shoot:behindUnit",
+    card: "toHit",
+    mode: "shooting",
+    label: "Target Behind Another Unit",
+    effect: { kind: "numeric", value: -2 },
+    category: "general",
+    tooltip:
+      "Line of fire passing through an intervening unit treats the target as having hard cover.",
+  },
+  {
+    id: "toHit:shoot:sniper",
+    card: "toHit",
+    mode: "shooting",
+    label: "Sniper",
+    effect: { kind: "numeric", value: -1 },
+    category: "general",
+    tooltip: "Penalty for a precision shot picking out a specific target.",
+  },
+  {
+    id: "toHit:shoot:customToHitDelta",
+    card: "toHit",
+    mode: "shooting",
+    label: "Custom ±To Hit",
+    effect: { kind: "numeric", value: 0 },
+    variableValue: { min: -5, max: 5, default: 0 },
+    category: "custom",
+  },
+  {
+    id: "toHit:shoot:targetSkirmisher",
+    card: "toHit",
+    mode: "shooting",
+    label: "Target is Skirmishers",
+    effect: { kind: "numeric", value: -1 },
+    category: "general",
+    tooltip: "Skirmisher targets impose an additional -1 to hit.",
+  },
+  {
+    id: "toHit:shoot:melkothsMiasma",
+    card: "toHit",
+    mode: "shooting",
+    label: "Melkoth's Mystifying Miasma",
+    effect: { kind: "delta-bs", sign: -1 },
+    variableValue: { min: 1, max: 3, default: 1 },
+    category: "spell",
+    tooltip: "Target's BS reduced by D3 (stepper magnitude 1-3).",
+  },
+  {
+    id: "toHit:shoot:targetInForest",
+    card: "toHit",
+    mode: "shooting",
+    label: "Target in Forest",
+    effect: { kind: "numeric", value: -1 },
+    category: "terrain",
+    tooltip: "Models inside a wood receive soft cover.",
+  },
+  {
+    id: "toHit:shoot:targetInBuilding",
+    card: "toHit",
+    mode: "shooting",
+    label: "Target in Building",
+    effect: { kind: "numeric", value: -2 },
+    category: "terrain",
+    tooltip: "Garrisoned models receive hard cover.",
+  },
+  {
+    id: "toHit:shoot:targetBehindWall",
+    card: "toHit",
+    mode: "shooting",
+    label: "Target behind Wall / Fence",
+    effect: { kind: "numeric", value: -1 },
+    category: "terrain",
+    tooltip: "Soft cover from a low wall, hedge, or fence.",
   },
 
   // ── To Wound ────────────────────────────────────────────────────────────
@@ -446,6 +626,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:savageBeastOfHorros",
     card: "toWound",
+    mode: "melee",
     label: "Savage Beast of Horros",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 3 },
     category: "spell",
@@ -474,6 +655,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:enfeeblingFoe",
     card: "toWound",
+    mode: "melee",
     label: "The Enfeebling Foe",
     effect: { kind: "delta-stat", stat: "S", sign: -1 },
     variableValue: { min: 1, max: 3, default: 1 },
@@ -504,6 +686,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:okkamsMindrazor",
     card: "toWound",
+    mode: "melee",
     label: "Okkam's Mindrazor",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 4 },
     category: "spell",
@@ -512,6 +695,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:powerOfDarkness",
     card: "toWound",
+    mode: "melee",
     label: "Power of Darkness",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "spell",
@@ -519,6 +703,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:wordOfPainBoosted",
     card: "toWound",
+    mode: "melee",
     label: "Word of Pain (boosted)",
     effect: { kind: "delta-stat", stat: "S", sign: -1 },
     variableValue: { min: 1, max: 3, default: 1 },
@@ -558,6 +743,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:bullgorger",
     card: "toWound",
+    mode: "melee",
     label: "Bullgorger",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "spell",
@@ -572,6 +758,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:fistsOfGork",
     card: "toWound",
+    mode: "melee",
     label: "Fists of Gork",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 3 },
     category: "spell",
@@ -579,6 +766,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:powerOfDaWaaagh",
     card: "toWound",
+    mode: "melee",
     label: "Power of da Waaagh! active",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "spell",
@@ -586,6 +774,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:mantleOfGhorok",
     card: "toWound",
+    mode: "melee",
     label: "Mantle of Ghorok",
     effect: { kind: "delta-stat", stat: "S", sign: 1 },
     variableValue: { min: 1, max: 6, default: 1 },
@@ -604,6 +793,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:blizzardAura",
     card: "toWound",
+    mode: "melee",
     label: "Blizzard Aura",
     effect: { kind: "delta-stat", stat: "S", sign: -1, magnitude: 1 },
     category: "race-ability",
@@ -613,6 +803,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:attunedToMagic",
     card: "toWound",
+    mode: "melee",
     label: "Attuned to Magic",
     effect: { kind: "delta-stat", stat: "S", sign: 1 },
     variableValue: { min: -1, max: 1, default: 1 },
@@ -625,6 +816,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:netters",
     card: "toWound",
+    mode: "melee",
     label: "Netters",
     effect: { kind: "delta-stat", stat: "S", sign: -1, magnitude: 1 },
     category: "race-ability",
@@ -633,6 +825,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:tuskerCharge",
     card: "toWound",
+    mode: "melee",
     label: "Tusker Charge (on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 2 },
     category: "race-ability",
@@ -643,6 +836,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:resolute",
     card: "toWound",
+    mode: "melee",
     label: "Resolute (on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-ability",
@@ -661,6 +855,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:thunderousCharge",
     card: "toWound",
+    mode: "melee",
     label: "Thunderous Charge (on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-ability",
@@ -671,6 +866,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:murderousCharge",
     card: "toWound",
+    mode: "melee",
     label: "Murderous Charge (on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-ability",
@@ -679,6 +875,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:eyeSlaughterersStr",
     card: "toWound",
+    mode: "melee",
     label: "Eye of the Gods: Slaughterer's Str",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-ability",
@@ -697,6 +894,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:tallyPestilence7",
     card: "toWound",
+    mode: "melee",
     label: "Tally of Pestilence 7+",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-ability",
@@ -763,6 +961,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:thunderousBludgeon",
     card: "toWound",
+    mode: "melee",
     label: "Thunderous Bludgeon",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 7 },
     category: "race-ability",
@@ -774,6 +973,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:potionOfStrength",
     card: "toWound",
+    mode: "melee",
     label: "Potion of Strength",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 3 },
     category: "brb-artifact",
@@ -855,6 +1055,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:maneOfPurebreed",
     card: "toWound",
+    mode: "melee",
     label: "Mane of the Purebreed",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-artifact",
@@ -866,6 +1067,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:spearMounted",
     card: "toWound",
+    mode: "melee",
     label: "Spear (mounted, on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "brb-weapon",
@@ -873,6 +1075,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:lance",
     card: "toWound",
+    mode: "melee",
     label: "Lance (on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 2 },
     category: "brb-weapon",
@@ -880,6 +1083,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:halberd",
     card: "toWound",
+    mode: "melee",
     label: "Halberd",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "brb-weapon",
@@ -887,6 +1091,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:greatWeapon",
     card: "toWound",
+    mode: "melee",
     label: "Great Weapon",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 2 },
     category: "brb-weapon",
@@ -894,6 +1099,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:flail",
     card: "toWound",
+    mode: "melee",
     label: "Flail (first combat round)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 2 },
     category: "brb-weapon",
@@ -901,6 +1107,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:morningStar",
     card: "toWound",
+    mode: "melee",
     label: "Morning Star (first combat round)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "brb-weapon",
@@ -910,6 +1117,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:ensorcelledHandWeapon",
     card: "toWound",
+    mode: "melee",
     label: "Ensorcelled Hand Weapon",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-weapon",
@@ -918,6 +1126,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:fireglaive",
     card: "toWound",
+    mode: "melee",
     label: "Fireglaive",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-weapon",
@@ -937,6 +1146,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:steamDrill",
     card: "toWound",
+    mode: "melee",
     label: "Steam Drill",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 3 },
     category: "race-weapon",
@@ -947,6 +1157,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:choppa",
     card: "toWound",
+    mode: "melee",
     label: "Choppa (first combat round)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-weapon",
@@ -957,6 +1168,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:asraiSpear",
     card: "toWound",
+    mode: "melee",
     label: "Asrai Spear (mounted, on charge)",
     effect: { kind: "delta-stat", stat: "S", sign: 1, magnitude: 1 },
     category: "race-weapon",
@@ -967,6 +1179,7 @@ export const MODIFIER_CONFIGS: readonly ModifierConfig[] = [
   {
     id: "toWound:customSDelta",
     card: "toWound",
+    mode: "melee",
     label: "Custom ±S",
     effect: { kind: "delta-stat", stat: "S", sign: 1 },
     variableValue: { min: -10, max: 10, default: 0 },
@@ -1693,6 +1906,7 @@ export function modifierSortKey(config: ModifierConfig): number {
   const kind = config.effect.kind;
   if (kind === "force-ws") return 0;
   if (kind === "delta-ws") return 1;
+  if (kind === "delta-bs") return 1;
   if (kind === "delta-stat") return 1;
   if (kind === "force-target") return 2;
   if (kind === "numeric") return config.effect.value >= 0 ? 3 : 4;
