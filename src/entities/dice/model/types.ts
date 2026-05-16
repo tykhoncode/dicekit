@@ -1,5 +1,7 @@
 export type CardKind = "toHit" | "toWound" | "armourSave" | "wardSave";
 
+export type AttackMode = "melee" | "shooting";
+
 export type DiceTarget = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type DiceTargetString = `${DiceTarget}+`;
@@ -8,7 +10,8 @@ export type UnrollableMarker =
   | "auto-fail"
   | "auto-pass"
   | "no-save"
-  | "no-ward";
+  | "no-ward"
+  | "impossible";
 
 export type DisplayedTarget = DiceTarget | UnrollableMarker;
 
@@ -22,6 +25,13 @@ export type ModifierEffect =
   | {
       kind: "delta-ws";
       target: "attacker" | "defender";
+      sign: -1 | 1;
+      /** Fixed magnitude. When omitted, magnitude is driven by
+       *  `ModifierState.value` / `variableValue.default`. */
+      magnitude?: number;
+    }
+  | {
+      kind: "delta-bs";
       sign: -1 | 1;
       /** Fixed magnitude. When omitted, magnitude is driven by
        *  `ModifierState.value` / `variableValue.default`. */
@@ -86,6 +96,10 @@ export type ModifierConfig = {
    *  effects (e.g. Rune of Striking ×3) that subsequent spells can
    *  override. Lowest priority in the resolution chain. */
   prePhase?: boolean;
+  /** Optional. Absent = visible & active in both attack modes (the default
+   *  for existing To Wound / AS / Ward configs). Set explicitly to restrict
+   *  the rule to a single attack mode. */
+  mode?: AttackMode;
 };
 
 export type ModifierState = {
@@ -111,6 +125,7 @@ export type SaveBaseTarget = DiceTarget | "none";
 export type StatInputs = {
   attackerWS?: number;
   defenderWS?: number;
+  attackerBS?: number;
   strength?: number;
   toughness?: number;
   baseTarget?: SaveBaseTarget;
@@ -120,6 +135,10 @@ export type CardState = {
   kind: CardKind;
   inputs: StatInputs;
   modifiers: ModifierState[];
+  /** Parallel active state for shooting attacks. One entry per config where
+   *  `config.mode !== "melee"` (i.e. shooting or untagged/both). Active flags
+   *  are independent from `modifiers`. */
+  modifiersShooting: ModifierState[];
 };
 
 export type ComputedCardResult = {
@@ -130,6 +149,10 @@ export type ComputedCardResult = {
   /** Human-readable per-step breakdown: chart inputs, applied modifiers,
    *  the final clamped target. Each entry is a single short line. */
   steps: string[];
+  /** Set only when the To Hit step is in shooting mode and rawTarget is
+   *  7, 8, or 9. Encodes the cascade: roll `first+`, then on a 6 roll
+   *  `followUp+`. UI renders e.g. "6+ → 4+". */
+  cascade?: { first: 6; followUp: DiceTarget };
 };
 
 export type Outcome = {
@@ -138,6 +161,7 @@ export type Outcome = {
 };
 
 export type FullState = {
+  attackMode: AttackMode;
   toHit: CardState;
   toWound: CardState;
   armourSave: CardState;

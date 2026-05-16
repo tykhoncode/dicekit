@@ -51,24 +51,40 @@ export function SummaryPanel({
           Combat Sequence
         </span>
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          {ordered.map((result, index) => (
-            <div key={result.kind} className="flex items-center gap-2">
-              <span className="flex items-baseline gap-1.5">
-                <span className="font-heading text-lg font-bold tabular-nums text-[color:var(--accent-result)]">
-                  {formatTarget(result.target)}
+          {ordered.map((result, index) => {
+            const isImpossible = result.target === "impossible";
+            const isCascade = result.kind === "toHit" && result.cascade != null;
+            const targetDisplay = isImpossible
+              ? "✕"
+              : isCascade
+                ? `${result.rawTarget}+`
+                : formatTarget(result.target);
+            return (
+              <div key={result.kind} className="flex items-center gap-2">
+                <span className="flex items-baseline gap-1.5">
+                  <span
+                    className={cn(
+                      "font-heading text-lg font-bold tabular-nums",
+                      isImpossible
+                        ? "text-muted-foreground"
+                        : "text-[color:var(--accent-result)]",
+                    )}
+                  >
+                    {targetDisplay}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {STEP_LABELS[result.kind]}
+                  </span>
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  {STEP_LABELS[result.kind]}
-                </span>
-              </span>
-              {index < ordered.length - 1 && (
-                <ChevronRight
-                  aria-hidden="true"
-                  className="size-4 text-muted-foreground/60"
-                />
-              )}
-            </div>
-          ))}
+                {index < ordered.length - 1 && (
+                  <ChevronRight
+                    aria-hidden="true"
+                    className="size-4 text-muted-foreground/60"
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

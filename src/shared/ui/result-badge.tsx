@@ -1,5 +1,6 @@
 import type {
   CardKind,
+  DiceTarget,
   DisplayedTarget,
   ProbabilityFraction,
 } from "@/entities/dice/model/types";
@@ -8,17 +9,19 @@ import { cn } from "@/shared/lib/classnames";
 
 export function ResultBadge({
   target,
+  cascade,
   probability,
   kind,
   className,
 }: {
   target: DisplayedTarget;
+  cascade?: { first: 6; followUp: DiceTarget };
   probability: ProbabilityFraction;
   kind: CardKind;
   className?: string;
 }) {
-  const targetText = formatTarget(target);
   const probabilityText = formatProbability(probability, kind, target);
+
   return (
     <div
       className={cn(
@@ -29,9 +32,28 @@ export function ResultBadge({
       <span className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground">
         Required Roll
       </span>
-      <span className="font-heading text-5xl font-bold tabular-nums text-[color:var(--accent-result)]">
-        {targetText}
-      </span>
+      {cascade ? (
+        <span className="flex items-center gap-1.5">
+          <span className="font-heading text-5xl font-bold tabular-nums text-[color:var(--accent-result)]">
+            {formatTarget(cascade.first)}
+          </span>
+          <span className="text-2xl text-muted-foreground">→</span>
+          <span className="font-heading text-5xl font-bold tabular-nums text-[color:var(--accent-result)]">
+            {formatTarget(cascade.followUp)}
+          </span>
+        </span>
+      ) : (
+        <span
+          className={cn(
+            "font-heading text-5xl font-bold tabular-nums",
+            target === "impossible"
+              ? "text-muted-foreground"
+              : "text-[color:var(--accent-result)]",
+          )}
+        >
+          {formatTarget(target)}
+        </span>
+      )}
       <span className="text-xs text-muted-foreground">{probabilityText}</span>
     </div>
   );

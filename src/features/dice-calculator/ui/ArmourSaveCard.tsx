@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from "react";
 import { Shield } from "lucide-react";
 import {
   MODIFIER_CONFIGS,
+  type AttackMode,
   type CardState,
   type ComputedCardResult,
   type ModifierConfig,
@@ -15,13 +16,9 @@ import {
   type ModifierTone,
 } from "@/shared/ui/modifier-toggle-row";
 import { ResultBadge } from "@/shared/ui/result-badge";
-import { SaveSelect } from "@/shared/ui/save-select";
+import { SaveStepper } from "@/shared/ui/save-stepper";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
-
-const ARMOUR_MODIFIERS = MODIFIER_CONFIGS.filter(
-  (m) => m.card === "armourSave",
-);
 
 function sorted(configs: readonly ModifierConfig[]): ModifierConfig[] {
   return [...configs].sort((a, b) => {
@@ -38,6 +35,7 @@ type RenderRow = (config: ModifierConfig, tone?: ModifierTone) => ReactElement;
 
 export function ArmourSaveCard({
   state,
+  attackMode,
   result,
   onSetSaveTarget,
   onToggleModifier,
@@ -47,6 +45,7 @@ export function ArmourSaveCard({
   onTogglePinned,
 }: {
   state: CardState;
+  attackMode: AttackMode;
   result: ComputedCardResult;
   onSetSaveTarget: (value: SaveBaseTarget) => void;
   onToggleModifier: (id: ModifierId) => void;
@@ -58,17 +57,28 @@ export function ArmourSaveCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const activeModifiers =
+    attackMode === "melee" ? state.modifiers : state.modifiersShooting;
+  const ARMOUR_SAVE_CONFIGS = useMemo(
+    () =>
+      MODIFIER_CONFIGS.filter(
+        (c) =>
+          c.card === "armourSave" &&
+          (c.mode === undefined || c.mode === attackMode),
+      ),
+    [attackMode],
+  );
   const baseTarget: SaveBaseTarget = state.inputs.baseTarget ?? 6;
   const stateById = useMemo(
-    () => new Map(state.modifiers.map((m) => [m.id, m])),
-    [state.modifiers],
+    () => new Map(activeModifiers.map((m) => [m.id, m])),
+    [activeModifiers],
   );
 
   const groupedConfigs = useMemo(() => {
     const general: ModifierConfig[] = [];
     const spells: ModifierConfig[] = [];
     const custom: ModifierConfig[] = [];
-    for (const c of ARMOUR_MODIFIERS) {
+    for (const c of ARMOUR_SAVE_CONFIGS) {
       switch (c.category ?? "general") {
         case "general":
           general.push(c);
@@ -88,7 +98,7 @@ export function ArmourSaveCard({
       spells: [...spells].sort((a, b) => a.label.localeCompare(b.label)),
       custom: sorted(custom),
     };
-  }, []);
+  }, [ARMOUR_SAVE_CONFIGS]);
 
   const isAutoResult = (c: ModifierConfig) => c.effect.kind === "auto-result";
   const isPinned = (c: ModifierConfig) => Boolean(stateById.get(c.id)?.pinned);
@@ -96,7 +106,7 @@ export function ArmourSaveCard({
   const pinnedRows = useMemo(
     () =>
       sorted(
-        ARMOUR_MODIFIERS.filter(
+        ARMOUR_SAVE_CONFIGS.filter(
           (c) =>
             !isAutoResult(c) &&
             isPinned(c) &&
@@ -104,7 +114,7 @@ export function ArmourSaveCard({
         ),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.modifiers],
+    [activeModifiers, ARMOUR_SAVE_CONFIGS],
   );
 
   const pinnedIds = new Set(pinnedRows.map((c) => c.id));
@@ -170,7 +180,7 @@ export function ArmourSaveCard({
       subtitle="AS"
       infoText="Base armour save, modified by toggles plus the auto-derived Strength penalty (S4→-1, S5→-2, …) from the To Wound card."
       inputs={
-        <SaveSelect
+        <SaveStepper
           label="Base Armour Save"
           value={baseTarget}
           onChange={onSetSaveTarget}

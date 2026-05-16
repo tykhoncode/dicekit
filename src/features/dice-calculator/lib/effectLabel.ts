@@ -38,6 +38,13 @@ export function effectLabel(
     }
     return `${signed(effect.sign * (value ?? 1))} WS`;
   }
+  if (effect.kind === "delta-bs") {
+    const mag = effect.magnitude;
+    if (mag !== undefined) {
+      return `BS ${signed(effect.sign * mag)}`;
+    }
+    return `BS ${signed(effect.sign * (value ?? 1))}`;
+  }
   if (effect.kind === "force-target") return `${value ?? effect.value}+`;
   if (effect.kind === "delta-stat") {
     const target = opts?.target ?? "attacker";

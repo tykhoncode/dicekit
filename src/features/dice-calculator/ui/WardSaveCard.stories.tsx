@@ -25,6 +25,7 @@ function Live({ activate = [] }: { activate?: ModifierId[] }) {
     <div className="dark w-72">
       <WardSaveCard
         state={calc.state.wardSave}
+        attackMode={calc.state.attackMode}
         result={calc.results.wardSave}
         onSetSaveTarget={(v) => calc.actions.setSaveTarget("wardSave", v)}
         onToggleModifier={(id) => calc.actions.toggleModifier("wardSave", id)}

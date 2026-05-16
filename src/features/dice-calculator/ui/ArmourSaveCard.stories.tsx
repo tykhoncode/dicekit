@@ -33,6 +33,7 @@ function Live({
     <div className="dark w-72">
       <ArmourSaveCard
         state={calc.state.armourSave}
+        attackMode={calc.state.attackMode}
         result={calc.results.armourSave}
         onSetSaveTarget={(v) => calc.actions.setSaveTarget("armourSave", v)}
         onToggleModifier={(id) => calc.actions.toggleModifier("armourSave", id)}

@@ -2,6 +2,7 @@ import { useMemo, type ReactElement } from "react";
 import { Sparkles } from "lucide-react";
 import {
   MODIFIER_CONFIGS,
+  type AttackMode,
   type CardState,
   type ComputedCardResult,
   type ModifierConfig,
@@ -15,11 +16,9 @@ import {
   type ModifierTone,
 } from "@/shared/ui/modifier-toggle-row";
 import { ResultBadge } from "@/shared/ui/result-badge";
-import { SaveSelect } from "@/shared/ui/save-select";
+import { SaveStepper } from "@/shared/ui/save-stepper";
 import { effectLabel } from "../lib/effectLabel";
 import { CalculatorCard } from "./CalculatorCard";
-
-const WARD_MODIFIERS = MODIFIER_CONFIGS.filter((m) => m.card === "wardSave");
 
 function sorted(configs: readonly ModifierConfig[]): ModifierConfig[] {
   return [...configs].sort((a, b) => {
@@ -36,6 +35,7 @@ type RenderRow = (config: ModifierConfig, tone?: ModifierTone) => ReactElement;
 
 export function WardSaveCard({
   state,
+  attackMode,
   result,
   onSetSaveTarget,
   onToggleModifier,
@@ -45,6 +45,7 @@ export function WardSaveCard({
   onTogglePinned,
 }: {
   state: CardState;
+  attackMode: AttackMode;
   result: ComputedCardResult;
   onSetSaveTarget: (value: SaveBaseTarget) => void;
   onToggleModifier: (id: ModifierId) => void;
@@ -56,10 +57,21 @@ export function WardSaveCard({
   ) => void;
   onTogglePinned: (id: ModifierId) => void;
 }) {
+  const activeModifiers =
+    attackMode === "melee" ? state.modifiers : state.modifiersShooting;
+  const WARD_SAVE_CONFIGS = useMemo(
+    () =>
+      MODIFIER_CONFIGS.filter(
+        (c) =>
+          c.card === "wardSave" &&
+          (c.mode === undefined || c.mode === attackMode),
+      ),
+    [attackMode],
+  );
   const baseTarget: SaveBaseTarget = state.inputs.baseTarget ?? "none";
   const stateById = useMemo(
-    () => new Map(state.modifiers.map((m) => [m.id, m])),
-    [state.modifiers],
+    () => new Map(activeModifiers.map((m) => [m.id, m])),
+    [activeModifiers],
   );
 
   const groupedConfigs = useMemo(() => {
@@ -69,7 +81,7 @@ export function WardSaveCard({
     const custom: ModifierConfig[] = [];
     const racialAbilitiesMap = new Map<string, ModifierConfig[]>();
     const racialArtifactsMap = new Map<string, ModifierConfig[]>();
-    for (const c of WARD_MODIFIERS) {
+    for (const c of WARD_SAVE_CONFIGS) {
       switch (c.category ?? "general") {
         case "general":
           general.push(c);
@@ -119,7 +131,7 @@ export function WardSaveCard({
       })),
       custom: sorted(custom),
     };
-  }, []);
+  }, [WARD_SAVE_CONFIGS]);
 
   const isAutoResult = (c: ModifierConfig) => c.effect.kind === "auto-result";
   const isPinned = (c: ModifierConfig) => Boolean(stateById.get(c.id)?.pinned);
@@ -127,7 +139,7 @@ export function WardSaveCard({
   const pinnedRows = useMemo(
     () =>
       sorted(
-        WARD_MODIFIERS.filter(
+        WARD_SAVE_CONFIGS.filter(
           (c) =>
             !isAutoResult(c) &&
             isPinned(c) &&
@@ -135,7 +147,7 @@ export function WardSaveCard({
         ),
       ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [state.modifiers],
+    [activeModifiers, WARD_SAVE_CONFIGS],
   );
 
   const pinnedIds = new Set(pinnedRows.map((c) => c.id));
@@ -212,7 +224,7 @@ export function WardSaveCard({
       subtitle="WSv"
       infoText="Ward saves are never modified by the attack's Strength. Parry Ward (6++) sets a 6+ floor on the displayed ward target. Regeneration and ward grants resolve via the smallest force-target."
       inputs={
-        <SaveSelect
+        <SaveStepper
           label="Base Ward Save"
           value={baseTarget}
           onChange={onSetSaveTarget}

@@ -1,4 +1,5 @@
 import type {
+  AttackMode,
   CardKind,
   CardState,
   ComputedCardResult,
@@ -104,15 +105,32 @@ function activeAutoResult(
   return null;
 }
 
-export function getEffectiveStrength(toWound: CardState): number {
+function activeModifierArray(
+  card: CardState,
+  attackMode: AttackMode,
+): readonly ModifierState[] {
+  return attackMode === "melee" ? card.modifiers : card.modifiersShooting;
+}
+
+export function getEffectiveStrength(
+  toWound: CardState,
+  attackMode: AttackMode,
+): number {
   const base = toWound.inputs.strength ?? INITIAL_DEFAULTS.strength;
-  const buff = activeDeltaStat(toWound.modifiers).attackerS;
+  const buff = activeDeltaStat(
+    activeModifierArray(toWound, attackMode),
+  ).attackerS;
   return base + buff;
 }
 
-export function getEffectiveToughness(toWound: CardState): number {
+export function getEffectiveToughness(
+  toWound: CardState,
+  attackMode: AttackMode,
+): number {
   const base = toWound.inputs.toughness ?? INITIAL_DEFAULTS.toughness;
-  const buff = activeDeltaStat(toWound.modifiers).defenderT;
+  const buff = activeDeltaStat(
+    activeModifierArray(toWound, attackMode),
+  ).defenderT;
   return base + buff;
 }
 
@@ -195,6 +213,25 @@ function activeDeltaWS(
   return { attacker, defender };
 }
 
+function activeDeltaBS(modifiers: readonly ModifierState[]): number {
+  let sum = 0;
+  for (const state of modifiers) {
+    if (!state.active) continue;
+    const config = CONFIG_BY_ID.get(state.id);
+    if (config?.effect.kind !== "delta-bs") continue;
+    const fallback = config.variableValue?.default ?? 1;
+    const sign = config.effect.sign;
+    const fixedMag = config.effect.magnitude;
+    const mag = fixedMag ?? state.value ?? fallback;
+    sum += sign * mag;
+  }
+  return sum;
+}
+
+function clampBS(bs: number): number {
+  return Math.max(1, Math.min(10, bs));
+}
+
 function activeForceTarget(modifiers: readonly ModifierState[]): number | null {
   let target: number | null = null;
   for (const state of modifiers) {
@@ -228,23 +265,19 @@ function statLabel(base: number, effective: number): string {
   return base === effective ? `${base}` : `(${base}→${effective})`;
 }
 
-function explainToHit(toHit: CardState): CardBreakdown {
+function explainToHitMelee(toHit: CardState): CardBreakdown {
   const baseA = toHit.inputs.attackerWS ?? INITIAL_DEFAULTS.attackerWS;
   const baseD = toHit.inputs.defenderWS ?? INITIAL_DEFAULTS.defenderWS;
 
-  // Pre-magic phase: persistent artifacts (e.g. Rune of Striking ×3)
-  // — lowest priority, can be overridden by spells in the magic phase.
   const preForce = activeForceWS(toHit.modifiers, "pre");
   const aPre = preForce.attacker ?? baseA;
   const dPre = preForce.defender ?? baseD;
 
-  // Magic phase: force-ws + delta-ws not flagged postPhase
   const magicForce = activeForceWS(toHit.modifiers, "magic");
   const magicDelta = activeDeltaWS(toHit.modifiers, "magic");
   const aMagic = clampWS((magicForce.attacker ?? aPre) + magicDelta.attacker);
   const dMagic = clampWS((magicForce.defender ?? dPre) + magicDelta.defender);
 
-  // Post phase: pre-combat tests (Fear, Enchanting Beauty) — applied last
   const postForce = activeForceWS(toHit.modifiers, "post");
   const postDelta = activeDeltaWS(toHit.modifiers, "post");
   let a = postForce.attacker ?? aMagic;
@@ -271,13 +304,45 @@ function explainToHit(toHit: CardState): CardBreakdown {
   return { rawTarget: computed, steps };
 }
 
-function explainToWound(toWound: CardState): CardBreakdown {
+function explainToHitShooting(toHit: CardState): CardBreakdown {
+  const baseBS = toHit.inputs.attackerBS ?? INITIAL_DEFAULTS.attackerBS;
+  const bsDelta = activeDeltaBS(toHit.modifiersShooting);
+  const effectiveBS = clampBS(baseBS + bsDelta);
+  const chartTarget = Math.max(2, Math.min(6, 7 - effectiveBS));
+  const modSum = activeNumericModifierSum(toHit.modifiersShooting);
+  const computed = chartTarget - modSum;
+
+  const steps: string[] = [
+    `BS ${statLabel(baseBS, effectiveBS)} → ${chartTarget}+`,
+    `mods ${signed(modSum)} → ${formatTargetForStep(computed)}`,
+  ];
+
+  const forced = activeForceTarget(toHit.modifiersShooting);
+  if (forced !== null) {
+    const finalTarget = Math.min(forced, Math.max(1, Math.round(computed)));
+    steps.push(`forced → ${forced}+`);
+    return { rawTarget: finalTarget, steps };
+  }
+  return { rawTarget: computed, steps };
+}
+
+function explainToHit(toHit: CardState, attackMode: AttackMode): CardBreakdown {
+  return attackMode === "melee"
+    ? explainToHitMelee(toHit)
+    : explainToHitShooting(toHit);
+}
+
+function explainToWound(
+  toWound: CardState,
+  attackMode: AttackMode,
+): CardBreakdown {
+  const mods = activeModifierArray(toWound, attackMode);
   const baseS = toWound.inputs.strength ?? INITIAL_DEFAULTS.strength;
   const baseT = toWound.inputs.toughness ?? INITIAL_DEFAULTS.toughness;
-  const effectiveS = getEffectiveStrength(toWound);
-  const effectiveT = getEffectiveToughness(toWound);
+  const effectiveS = getEffectiveStrength(toWound, attackMode);
+  const effectiveT = getEffectiveToughness(toWound, attackMode);
   const chartTarget = parseTarget(lookupToWound(effectiveS, effectiveT));
-  const directModSum = activeNumericModifierSum(toWound.modifiers);
+  const directModSum = activeNumericModifierSum(mods);
   const computed = chartTarget - directModSum;
 
   const steps: string[] = [
@@ -285,7 +350,7 @@ function explainToWound(toWound: CardState): CardBreakdown {
     `mods ${signed(directModSum)} → ${formatTargetForStep(computed)}`,
   ];
 
-  const forced = activeForceTarget(toWound.modifiers);
+  const forced = activeForceTarget(mods);
   if (forced !== null) {
     const finalTarget = Math.min(forced, Math.max(1, Math.round(computed)));
     steps.push(`forced → ${forced}+`);
@@ -298,8 +363,10 @@ function explainArmourSave(
   armourSave: CardState,
   effectiveStrength: number,
   base: DiceTarget,
+  attackMode: AttackMode,
 ): CardBreakdown {
-  const modSum = activeNumericModifierSum(armourSave.modifiers);
+  const mods = activeModifierArray(armourSave, attackMode);
+  const modSum = activeNumericModifierSum(mods);
   const strengthPenalty = -Math.max(0, effectiveStrength - 3);
   const afterStrength = base - strengthPenalty;
   const raw = afterStrength - modSum;
@@ -312,7 +379,7 @@ function explainArmourSave(
   }
   steps.push(`mods ${signed(modSum)} → ${formatTargetForStep(raw)}`);
 
-  const forced = activeForceTarget(armourSave.modifiers);
+  const forced = activeForceTarget(mods);
   if (forced !== null) {
     const finalTarget = Math.min(forced, Math.max(1, Math.round(raw)));
     steps.push(`forced → ${forced}+`);
@@ -321,10 +388,15 @@ function explainArmourSave(
   return { rawTarget: raw, steps };
 }
 
-function explainWardSave(wardSave: CardState, base: DiceTarget): CardBreakdown {
-  const modSum = activeNumericModifierSum(wardSave.modifiers);
+function explainWardSave(
+  wardSave: CardState,
+  base: DiceTarget,
+  attackMode: AttackMode,
+): CardBreakdown {
+  const mods = activeModifierArray(wardSave, attackMode);
+  const modSum = activeNumericModifierSum(mods);
   let raw = base - modSum;
-  const hasParry = hasActiveReplaceWard(wardSave.modifiers);
+  const hasParry = hasActiveReplaceWard(mods);
   if (hasParry) raw = Math.min(raw, PARRY_WARD_VALUE);
 
   const steps: string[] = [
@@ -333,9 +405,7 @@ function explainWardSave(wardSave: CardState, base: DiceTarget): CardBreakdown {
   ];
   if (hasParry) steps.push(`Parry floor ${PARRY_WARD_VALUE}+`);
 
-  // force-target on ward: any active "ward N+" or Regeneration grant
-  // sets the target to AT MOST that value (smallest wins).
-  const forced = activeForceTarget(wardSave.modifiers);
+  const forced = activeForceTarget(mods);
   if (forced !== null) {
     const finalTarget = Math.min(forced, Math.max(1, Math.round(raw)));
     steps.push(`forced → ${forced}+`);
@@ -344,12 +414,18 @@ function explainWardSave(wardSave: CardState, base: DiceTarget): CardBreakdown {
   return { rawTarget: raw, steps };
 }
 
-export function computeToHitTarget(toHit: CardState): number {
-  return explainToHit(toHit).rawTarget;
+export function computeToHitTarget(
+  toHit: CardState,
+  attackMode: AttackMode,
+): number {
+  return explainToHit(toHit, attackMode).rawTarget;
 }
 
-export function computeToWoundTarget(toWound: CardState): number {
-  return explainToWound(toWound).rawTarget;
+export function computeToWoundTarget(
+  toWound: CardState,
+  attackMode: AttackMode,
+): number {
+  return explainToWound(toWound, attackMode).rawTarget;
 }
 
 function resolveBase(
@@ -362,16 +438,21 @@ function resolveBase(
 export function computeArmourSaveTarget(
   armourSave: CardState,
   effectiveStrength: number,
+  attackMode: AttackMode,
 ): number {
   const base = resolveBase(armourSave, INITIAL_DEFAULTS.armourBaseTarget);
   if (base === "none") return Infinity;
-  return explainArmourSave(armourSave, effectiveStrength, base).rawTarget;
+  return explainArmourSave(armourSave, effectiveStrength, base, attackMode)
+    .rawTarget;
 }
 
-export function computeWardSaveTarget(wardSave: CardState): number {
+export function computeWardSaveTarget(
+  wardSave: CardState,
+  attackMode: AttackMode,
+): number {
   const base = resolveBase(wardSave, INITIAL_DEFAULTS.wardBaseTarget);
   if (base === "none") return Infinity;
-  return explainWardSave(wardSave, base).rawTarget;
+  return explainWardSave(wardSave, base, attackMode).rawTarget;
 }
 
 function noSaveResult(kind: "armourSave" | "wardSave"): ComputedCardResult {
@@ -397,6 +478,30 @@ export function clampAndFormat(rawTarget: number): {
   }
   const dice = rounded as 2 | 3 | 4 | 5;
   return { target: dice, probability: (7 - dice) / 6 };
+}
+
+function formatToHitShooting(rawTarget: number): {
+  target: DisplayedTarget;
+  cascade?: { first: 6; followUp: DiceTarget };
+  probability: ProbabilityFraction;
+} {
+  const rounded = Math.round(rawTarget);
+  if (rounded <= 1) {
+    return { target: 1, probability: 5 / 6 };
+  }
+  if (rounded <= 6) {
+    const dice = Math.max(2, rounded) as 2 | 3 | 4 | 5 | 6;
+    return { target: dice, probability: (7 - dice) / 6 };
+  }
+  if (rounded <= 9) {
+    const followUp = (rounded - 3) as DiceTarget;
+    return {
+      target: 6,
+      cascade: { first: 6, followUp },
+      probability: (1 / 6) * ((7 - followUp) / 6),
+    };
+  }
+  return { target: "impossible", probability: 0 };
 }
 
 export function chanceFromTarget(target: number): ProbabilityFraction {
@@ -470,10 +575,25 @@ function resolveCard(
   kind: CardKind,
   modifiers: readonly ModifierState[],
   breakdown: CardBreakdown,
+  attackMode: AttackMode,
 ): ComputedCardResult {
   const override = activeAutoResult(modifiers);
   if (override) {
     return autoResultFor(kind, override, breakdown.rawTarget, breakdown.steps);
+  }
+  if (kind === "toHit" && attackMode === "shooting") {
+    const fmt = formatToHitShooting(breakdown.rawTarget);
+    const result: ComputedCardResult = {
+      kind,
+      target: fmt.target,
+      probability: fmt.probability,
+      rawTarget: breakdown.rawTarget,
+      steps: breakdown.steps,
+    };
+    if (fmt.cascade) {
+      result.cascade = fmt.cascade;
+    }
+    return result;
   }
   const fmt = clampAndFormat(breakdown.rawTarget);
   return {
@@ -489,10 +609,11 @@ export function computeFullState(state: FullState): {
   results: ComputedCardResult[];
   outcome: Outcome;
 } {
-  const effectiveS = getEffectiveStrength(state.toWound);
+  const { attackMode } = state;
+  const effectiveS = getEffectiveStrength(state.toWound, attackMode);
 
-  const toHit = explainToHit(state.toHit);
-  const toWound = explainToWound(state.toWound);
+  const toHit = explainToHit(state.toHit, attackMode);
+  const toWound = explainToWound(state.toWound, attackMode);
 
   const armourBase = resolveBase(
     state.armourSave,
@@ -505,8 +626,14 @@ export function computeFullState(state: FullState): {
       ? noSaveResult("armourSave")
       : resolveCard(
           "armourSave",
-          state.armourSave.modifiers,
-          explainArmourSave(state.armourSave, effectiveS, armourBase),
+          activeModifierArray(state.armourSave, attackMode),
+          explainArmourSave(
+            state.armourSave,
+            effectiveS,
+            armourBase,
+            attackMode,
+          ),
+          attackMode,
         );
 
   const wardResult: ComputedCardResult =
@@ -514,13 +641,24 @@ export function computeFullState(state: FullState): {
       ? noSaveResult("wardSave")
       : resolveCard(
           "wardSave",
-          state.wardSave.modifiers,
-          explainWardSave(state.wardSave, wardBase),
+          activeModifierArray(state.wardSave, attackMode),
+          explainWardSave(state.wardSave, wardBase, attackMode),
+          attackMode,
         );
 
   const results: ComputedCardResult[] = [
-    resolveCard("toHit", state.toHit.modifiers, toHit),
-    resolveCard("toWound", state.toWound.modifiers, toWound),
+    resolveCard(
+      "toHit",
+      activeModifierArray(state.toHit, attackMode),
+      toHit,
+      attackMode,
+    ),
+    resolveCard(
+      "toWound",
+      activeModifierArray(state.toWound, attackMode),
+      toWound,
+      attackMode,
+    ),
     armourResult,
     wardResult,
   ];
